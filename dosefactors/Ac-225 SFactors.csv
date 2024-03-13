@@ -1,0 +1,27 @@
+Tissue,OLINDA,Adrenals,Brain,Esophagus,Eyes,Gallbladder Wall,Left Colon,Small Intestine,Stomach,Right Colon,Rectum,Heart,Kidney,Liver,Lung,Pancreas,Prostate,Salivary Gland,Blood,Ostogenic Cells,Spleen,Testes,Thymus,Thyroid,Bladder,Tumor,Total
+Adrenals,,5.86E+03,,,,,,,,,,,,,,,,,,,,,,,,,2.33E-01
+Brain,,,5.67E+01,,,,,,,,,,,,,,,,,,,,,,,,2.33E-01
+Esophagus,,,,2.05E+03,,,,,,,,,,,,,,,,,,,,,,,2.33E-01
+Eyes,,,,,5.47E+03,,,,,,,,,,,,,,,,,,,,,,2.33E-01
+Gallbladder Wall,,,,,,7.72E+00,,,,,,,,,,,,,,,,,,,,,2.33E-01
+Left Colon,,,,,,,5.51E+00,,,,,,,,,,,,,,,,,,,,2.33E-01
+Small Intestine,,,,,,,,1.24E+00,,,,,,,,,,,,,,,,,,,2.33E-01
+Stomach,Stomach Wall,,,,,,,,1.85E+00,,,,,,,,,,,,,,,,,,2.33E-01
+Right Colon,,,,,,,,,,2.91E+00,,,,,,,,,,,,,,,,,2.33E-01
+Rectum,,,,,,,,,,,5.62E+00,,,,,,,,,,,,,,,,2.33E-01
+Heart,Heart Wall,,,,,,,,,,,2.49E+02,,,,,,,,,,,,,,,2.33E-01
+Kidney,,,,,,,,,,,,,2.65E+02,,,,,,,,,,,,,,2.33E-01
+Liver,,,,,,,,,,,,,,4.57E+01,,,,,,,,,,,,,2.33E-01
+Lung,,,,,,,,,,,,,,,6.48E+01,,,,,,,,,,,,2.33E-01
+Pancreas,,,,,,,,,,,,,,,,5.86E+02,,,,,,,,,,,2.33E-01
+Prostate,,,,,,,,,,,,,,,,,4.83E+03,,,,,,,,,,2.33E-01
+Salivary Gland,,,,,,,,,,,,,,,,,,9.65E+02,,,,,,,,,2.33E-01
+Blood,Red Marrow,,,,,,,,,,,,,,,,,,6.98E+01,,,,,,,,3.42E-01
+Ostogenic Cells,,,,,,,,,,,,,,,,,,,,,,,,,,,
+Spleen,,,,,,,,,,,,,,,,,,,,,5.47E+02,,,,,,2.33E-01
+Testes,,,,,,,,,,,,,,,,,,,,,,9.38E+01,,,,,2.33E-01
+Thymus,,,,,,,,,,,,,,,,,,,,,,,3.28E+03,,,,2.33E-01
+Thyroid,,,,,,,,,,,,,,,,,,,,,,,,4.10E+03,,,2.33E-01
+Bladder,,,,,,,,,,,,,,,,,,,,,,,,,2.18E+00,,2.33E-01
+Tumor,Spherical,,,,,,,,,,,,,,,,,,,,,,,,,8.20E+03,
+Total,Total Body,,,,,,,,,,,,,,,,,,,,,,,,,,

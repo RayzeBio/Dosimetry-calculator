@@ -1,0 +1,43 @@
+Available tissues for mouse,Mass 30g mouse model [g],Source
+adrenal glands,,
+bladder wall,0.075,https://doi.org/10.2967/jnumed.109.070532
+blood,2.8,Matt's list
+bone,,
+bone marrow,0.75,Matt's list
+bone marrow (from blood),0.75,
+bone residual,,
+bottom half,,
+brain,0.568,https://doi.org/10.2967/jnumed.109.070532
+cecum,,
+eyes,,
+feces,,
+femur,,
+gallbladder,0.01,estimate from CDD Vault entries
+heart,0.235,Matt's list
+kidney,0.302,Matt's list
+large intestine,0.583,Matt's list
+large intestine contents,,
+liver,1.74,Matt's list
+lung,0.087,Matt's list
+muscle,10.3,Matt's list
+ovaries,,
+pancreas,0.378,https://doi.org/10.2967/jnumed.109.070532
+prostate,,
+salivary glands,0.14,Matt's list
+skeleton,2.61,https://doi.org/10.2967/jnumed.109.070532
+skin,,
+skull,,
+small intestine,1.74,Matt's list
+small intestine contents,,
+spleen,0.136,https://doi.org/10.2967/jnumed.109.070532
+stomach,0.055,Matt's list
+stomach contents,,
+tail,0.5,estimate from CDD Vault entries
+testes,0.197,https://doi.org/10.2967/jnumed.109.070532
+thymus,,
+thyroid,0.016,https://doi.org/10.2967/jnumed.109.070532
+top half,,
+total body,,
+tumor,0.153,Matt's list
+urine,,
+uterus,,

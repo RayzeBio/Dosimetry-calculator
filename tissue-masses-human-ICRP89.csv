@@ -1,0 +1,43 @@
+Available tissues for human,Mass Male human model [g],Source
+adrenal glands,14,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+bladder wall,50,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+blood,5300,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+bone,5500,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-5
+bone marrow,3650,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-6
+bone marrow (from blood),3650,
+bone residual,,
+bottom half,,
+brain,1450,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+cecum,,
+eyes,15,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+feces,150,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+femur,,
+gallbladder,10,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+heart,330,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-5
+kidney,310,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+large intestine,370,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-7
+large intestine contents,300,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-8
+liver,1800,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-9
+lung,1200,OLINDA ICRP89 male
+muscle,29000,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-11
+ovaries,11,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-12
+pancreas,140,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-13
+prostate,17,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-14
+salivary glands,85,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-15
+skeleton,10500,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-16
+skin,3300,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-17
+skull,660,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+small intestine,650,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+small intestine contents,350,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+spleen,150,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+stomach,150,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+stomach contents,250,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+tail,,
+testes,35,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+thymus,25,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+thyroid,20,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+top half,,
+total body,73,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+tumor,300,Matt's estimation
+urine,1600,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4
+uterus,80,https://journals.sagepub.com/doi/pdf/10.1177/ANIB_32_3-4

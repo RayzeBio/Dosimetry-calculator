@@ -1,0 +1,42 @@
+Available tissues for mouse,Mass 30g mouse model [g],Source
+adrenal glands,,
+bladder wall,0.075,https://doi.org/10.2967/jnumed.109.070532
+blood,1.929,David Huang: mouse tissue mass
+bone,,
+bone marrow,,
+bone residual,,
+bottom half,,
+brain,0.568,https://doi.org/10.2967/jnumed.109.070532
+cecum,,
+eyes,,
+feces,,
+femur,,
+gallbladder,0.01,estimate from CDD Vault entries
+heart,0.291,https://doi.org/10.2967/jnumed.109.070532
+kidney,0.374,https://doi.org/10.2967/jnumed.109.070532
+large intestine,0.709,https://doi.org/10.2967/jnumed.109.070532
+large intestine contents,,
+liver,2.15,https://doi.org/10.2967/jnumed.109.070532
+lung,0.107,https://doi.org/10.2967/jnumed.109.070532
+muscle,0.2,estimate from CDD Vault entries
+ovaries,,
+pancreas,0.378,https://doi.org/10.2967/jnumed.109.070532
+prostate,,
+salivary glands,,
+skeleton,2.61,https://doi.org/10.2967/jnumed.109.070532
+skin,,
+skull,,
+small intestine,2.12,https://doi.org/10.2967/jnumed.109.070532
+small intestine contents,,
+spleen,0.136,https://doi.org/10.2967/jnumed.109.070532
+stomach,0.069,https://doi.org/10.2967/jnumed.109.070532
+stomach contents,,
+tail,0.5,estimate from CDD Vault entries
+testes,0.197,https://doi.org/10.2967/jnumed.109.070532
+thymus,,
+thyroid,0.016,https://doi.org/10.2967/jnumed.109.070532
+top half,,
+total body,,
+tumor,0.172,David Huang: mouse tissue mass
+urine,,
+uterus,,

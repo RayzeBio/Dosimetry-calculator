@@ -1,0 +1,8 @@
+# By Charlotte Lorenz, RayzeBio 
+numpy
+scipy
+pandas
+matplotlib
+plotly
+xlsxwriter
+kaleido==0.1.0
