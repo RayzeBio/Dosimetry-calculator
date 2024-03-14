@@ -8,6 +8,8 @@ import requests
 import time
 import warnings
 import io
+import math
+
 from glob import glob
 from fnmatch import fnmatch
 from scipy.optimize import curve_fit
@@ -822,7 +824,7 @@ def get_condition_raw_aver(tissues,timepoints,bioD_data_filtered,readout_definit
     keywordlist = []
 
     readouts_expander = st.expander('Select readouts for reporting:')
-    readouts_expander.write('%ID/g or %ID/cc or kBq/cc are required for dosimetry (and Sample mass/body weight for BioD)')
+    readouts_expander.write('%ID/g or %ID/cc or kBq/cc are required for dosimetry (and Sample mass/body weight for BioD from cut and count, VOI volume/body weight/Inj. act. for BioD from Imaging)')
     for u_nr,uploaded_condition in enumerate(list(bioD_data_filtered.columns)):
         if '-' in uploaded_condition:
             pass
@@ -832,7 +834,7 @@ def get_condition_raw_aver(tissues,timepoints,bioD_data_filtered,readout_definit
             condition_uploaded_id = uploaded_condition
             readout_definitions_df = pd.DataFrame.from_dict(readout_definitions)
             readout_name = list(readout_definitions_df[readout_definitions_df['id'] == int(condition_uploaded_id)]['name'])[0]
-            if readout_name in ['Inj dose per gram',"%ID/g",'tumor volume','body weight','Sample mass',"%ID/cc","kBq/cc",'VOI volume','Tissue','Time point','Subject']:
+            if readout_name in ['Inj dose per gram',"%ID/g",'tumor volume','body weight','Sample mass',"%ID/cc","kBq/cc",'VOI volume','Tissue','Time point','Subject','Injected activity']:
                 preselect_condition = True
             else: 
                 preselect_condition = False
@@ -873,7 +875,8 @@ def get_condition_raw_aver(tissues,timepoints,bioD_data_filtered,readout_definit
     for tissue in tissues:
         inj_dose_averages=[]
         for i,timepoint in enumerate(timepoints):
-            data_per_tissue = bioD_data_filtered[bioD_data_filtered[f'{parameter_tissue_id}-value'].str.contains(str(tissue))]
+            # data_per_tissue = bioD_data_filtered[bioD_data_filtered[f'{parameter_tissue_id}-value'].str.contains(str(tissue))]
+            data_per_tissue = bioD_data_filtered[bioD_data_filtered[f'{parameter_tissue_id}-value'] == (str(tissue))]
             data_per_tissue = data_per_tissue[data_per_tissue[f'{parameter_timepoint_id}-value'] == timepoint]
             readout_id = get_readout_name_id(keyword_condition_to_get,readout_definitions)
             if f'{readout_id}-value' in list(data_per_tissue.columns):
@@ -884,7 +887,6 @@ def get_condition_raw_aver(tissues,timepoints,bioD_data_filtered,readout_definit
 
         # dosimetry dataframe contains only injected doses (averaged)
         results_for_dosimetry_Calc[tissue]=inj_dose_averages
-
 
     results_for_dosimetry_Calc_df = pd.DataFrame.from_dict(results_for_dosimetry_Calc, orient='index')
     results_for_dosimetry_Calc_df.sort_values(by=[time_keyword],axis=1,inplace=True)
@@ -963,18 +965,40 @@ def select_decay_correction_input():
         ''')
     return decay_correction
 
-def select_radioisotope1(rayz_id):
+def select_radioisotope1(rayz_id, text = 'Radioisotope 1: used in BioD study',preselect=''):
     try: #try to get isotope from RAYZ ID
         isotope_BioD = rayz_id.split('-')[-1][-2:]+'-'+rayz_id.split('-')[-1][:-2]
         isotope_BioD_nr = list(isotopes_BioD_halflives.keys()).index(isotope_BioD)
     except:
         isotope_BioD_nr = 0
 
-    radioisotope1 = st.radio(
-        f"Radioisotope 1: used in BioD study for {rayz_id}",
-        options=(isotopes_BioD_halflives.keys()), index=isotope_BioD_nr)                                
+    if len(preselect) > 0:
+        isotope_BioD_nr = list(isotopes_BioD_halflives.keys()).index(preselect)
+
+    radioisotope1 = st.radio(text+f' for {rayz_id}', options=(isotopes_BioD_halflives.keys()), index=isotope_BioD_nr, key=text)                                
     st.write(f'You selected {radioisotope1}')
     return radioisotope1
+
+def admAct_corr_kBqcc(results_for_dosimetry_Calc_df,administered_activity):
+    rawdata = results_for_dosimetry_Calc_df.copy(deep=False)
+    for datakey in results_for_dosimetry_Calc_df.keys():
+        if datakey != time_keyword:
+            results_for_dosimetry_Calc_df[datakey] = 100* results_for_dosimetry_Calc_df[datakey] / (administered_activity)
+    else:
+        results_for_dosimetry_Calc_df = results_for_dosimetry_Calc_df.copy(deep=False)
+    results_for_dosimetry_Calc_df = results_for_dosimetry_Calc_df.sort_index()
+    return [rawdata,results_for_dosimetry_Calc_df]
+
+def decay_corr_kBqcc(results_for_dosimetry_Calc_df,radioisotope1):
+    rawdata = results_for_dosimetry_Calc_df.copy(deep=False)
+    for datakey in results_for_dosimetry_Calc_df.keys():
+        if datakey != time_keyword:
+            # results_for_dosimetry_Calc_df[datakey+' [kBqcc]'] = results_for_dosimetry_Calc_df[datakey]
+            results_for_dosimetry_Calc_df[datakey] = results_for_dosimetry_Calc_df[datakey] / np.power(0.5, results_for_dosimetry_Calc_df[time_keyword]/isotopes_BioD_halflives[radioisotope1])
+    else:
+        results_for_dosimetry_Calc_df = results_for_dosimetry_Calc_df.copy(deep=False)
+    results_for_dosimetry_Calc_df = results_for_dosimetry_Calc_df.sort_index()
+    return [rawdata,results_for_dosimetry_Calc_df]
 
 def decay_corr_input(results_for_dosimetry_Calc_df,radioisotope1):
     rawdata = results_for_dosimetry_Calc_df.copy(deep=False)
@@ -988,13 +1012,19 @@ def decay_corr_input(results_for_dosimetry_Calc_df,radioisotope1):
     results_for_dosimetry_Calc_df = results_for_dosimetry_Calc_df.sort_index()
     return [rawdata,results_for_dosimetry_Calc_df]
 
-def download_cdd_rawdata(rayz_id,radioisotope1,results_for_dosimetry_Calc_df,rawdata,averaged_weight_all_timepoints_df,tissues,results_filtered):
+def download_cdd_rawdata(rayz_id,radioisotope1,results_for_dosimetry_Calc_df,rawdata,averaged_weight_all_timepoints_df,tissues,results_filtered,rawdata_kBqcc=[],rawdata_IDcc=[]):
     output_data = io.BytesIO()
     with pd.ExcelWriter(output_data, engine='xlsxwriter') as writer:  
         if st.session_state.decay_correction:
             sheet_title = f"{radioisotope1}-DecayCorrected"
             results_for_dosimetry_Calc_df.to_excel(writer, sheet_name = sheet_title, index = True)
-        rawdata.to_excel(writer, sheet_name = 'CDD input', index = True)
+        if len(rawdata_kBqcc) > 0 and len(rawdata_IDcc):
+            rawdata.to_excel(writer, sheet_name = 'Input IDcc Biol Decay Only', index = True)
+            rawdata_IDcc.to_excel(writer, sheet_name = 'Input kBqcc Biol Decay Only', index = True)
+            rawdata_kBqcc.to_excel(writer, sheet_name = 'CDD input kBqcc', index = True)
+        else:
+            rawdata.to_excel(writer, sheet_name = 'CDD input', index = True)
+
         averaged_weight_all_timepoints_df.to_excel(writer, sheet_name = 'aver weights from CDD', index = True)
         results_filtered.to_excel(writer, sheet_name = 'All data', index = True)
         if 'Tissue' in results_filtered.columns:

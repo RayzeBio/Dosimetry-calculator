@@ -213,11 +213,38 @@ def app(CDD_TOKEN='None'):
                     else:
                         st.write(f'There are BioD data uploaded in CDD Vault for {molecule_batch_ID}')
                         tissues,results_for_dosimetry_Calc_df,results_filtered_df,condition = get_condition_raw_aver(tissues,timepoints,bioD_data_filtered,readout_definitions)
-                        
+
                         averaged_weight_all_timepoints_df = get_masses_CDD(results_filtered_df, cdd_weight_key='VOI volume')
 
                         with st.expander(f'{condition} filtered and averaged'):
                             st.write(results_for_dosimetry_Calc_df)
+
+                        if condition == 'kBq/cc':
+                            st.write(f'Input data from Imaging ({condition}) need to be corrected for decay of imaging isotope to get biological decay only')
+
+                            radioisotope_imaging = select_radioisotope1(rayz_id, text= 'Radioisotope in Imaging study')
+                            rawdata_kBqcc,results_for_dosimetry_Calc_df = decay_corr_kBqcc(results_for_dosimetry_Calc_df,radioisotope_imaging)
+
+                            imaging_decay_corr = st.checkbox('Do you want to convert imaging data from kBq/cc to %ID/cc?',value=True)
+                            if imaging_decay_corr:
+                                st.write(f'Input data from Imaging ({condition}) need to be divided by administered activity to get %ID/cc from kBq/cc')
+                                if 'Injected activity' in results_filtered_df.columns:
+                                    admAct_uCi = results_filtered_df['Injected activity']
+                                    admAct_uCi = float(admAct_uCi.unique())
+                                    admAct_kBq = admAct_uCi*0.037*1000
+                                    st.write(f'Administered activity is {admAct_kBq:.2f} kBq')
+                                else:
+                                    st.error(f'Injected activity needs to be selected as readout')
+                                rawdata_kBqccBiolDecay,results_for_dosimetry_Calc_df = admAct_corr_kBqcc(results_for_dosimetry_Calc_df,administered_activity=admAct_kBq)
+                                condition = '%ID/cc'
+                                with st.expander('%ID/cc for Imaging'):
+                                    st.write('Data (biological decay only) in kBq/cc')
+                                    st.write(rawdata_kBqccBiolDecay)
+                                    st.write(f'Data (biological decay only) in %ID/cc')
+                                    st.write(results_for_dosimetry_Calc_df)
+                            else:
+                                rawdata_kBqcc=[]
+                                rawdata_kBqccBiolDecay=[]
 
                         ### Create plot of input data
                         plot_input_data_biod(results_for_dosimetry_Calc_df,condition,rayz_id)
@@ -226,14 +253,15 @@ def app(CDD_TOKEN='None'):
                         st.session_state.decay_correction = select_decay_correction_input()
 
                         # select isotope for decay correction of input
-                        radioisotope1 = select_radioisotope1(rayz_id)
+                        radioisotope1 = select_radioisotope1(rayz_id, text= 'Radioisotope to calculate organ exposure to radiation', preselect = 'Lu-177')
+
 
                         # decay correction of input data
                         rawdata, results_for_dosimetry_Calc_df = decay_corr_input(results_for_dosimetry_Calc_df,radioisotope1)
 
                         if st.session_state.decay_correction:
                             with st.expander('Decay corrected rawdata'):
-                                st.write('**From CDD Vault: Original data**')
+                                st.write('**Biological decay only**')
                                 st.table(rawdata)
                                 st.write(f'**Decay corrected for {radioisotope1}**')
                                 st.table(results_for_dosimetry_Calc_df)
@@ -242,7 +270,7 @@ def app(CDD_TOKEN='None'):
                         #########################################################################
                         # Download button for CDD rawdata (incl. decay correction if selected)
                         #########################################################################
-                        download_cdd_rawdata(rayz_id,radioisotope1,results_for_dosimetry_Calc_df,rawdata,averaged_weight_all_timepoints_df,tissues,results_filtered=results_filtered_df)
+                        download_cdd_rawdata(rayz_id,radioisotope1,results_for_dosimetry_Calc_df,rawdata,averaged_weight_all_timepoints_df,tissues,results_filtered=results_filtered_df,rawdata_kBqcc=rawdata_kBqcc,rawdata_IDcc=rawdata_kBqccBiolDecay)
 
                     if st.button('Continue with Dosimetry'):
                         st.session_state.continue_with_dosimetry = True
