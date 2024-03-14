@@ -2926,7 +2926,7 @@ def all_results_download(results_dosimetry_df,results_scaling_df,fitresults, dat
         results_scaling_df.to_excel(writer, sheet_name = "Scaling mTIAC -> hTIAC", index = False)
         if isinstance(fitresults, pd.DataFrame):
             fitresults.to_excel(writer, sheet_name = "Decay fit", index = False)
-        data_input.to_excel(writer, sheet_name = "Data input", index = False)
+        data_input.to_excel(writer, sheet_name = "Data input decay corrected", index = False)
         if isinstance(rawdata, pd.DataFrame):
             rawdata.to_excel(writer, sheet_name = "Data input", index = False)
         if isinstance(results_filtered, pd.DataFrame):
