@@ -263,7 +263,7 @@ def app(CDD_TOKEN='None'):
                             with st.expander('Decay corrected rawdata'):
                                 st.write('**Biological decay only**')
                                 st.table(rawdata)
-                                st.write(f'**Decay corrected for {radioisotope1}**')
+                                st.write(f'**Decay corrected for {radioisotope1}** (half-life = {isotopes_human_halflives[radioisotope1]} hours)')
                                 st.table(results_for_dosimetry_Calc_df)
 
 
