@@ -23,7 +23,10 @@ def app(CDD_TOKEN = 'None'):
     st.write(f'Biological half life of your compound: {half_life_biol:.2f} hours')
 
     with st.expander('Definition of Effective half life'):
-        st.image(Image.open('./pics/T_effective.png'), caption='Image 1: Definition of Effective Half Life')  
+        try:
+            st.image(Image.open('./pics/T_Effective.PNG'), caption='Image 1: Definition of Effective Half Life')  
+        except:
+            pass
         st.write('https://www.studysmarter.co.uk/explanations/physics/medical-physics/effective-half-life/#:~:text=multiple%20choice%20flashcards-,Effective%20half%2Dlife%20is%20the%20time%20it%20takes%20for%20the,will%20be%20discussed%20later%20on.')
 
 
@@ -32,9 +35,15 @@ def app(CDD_TOKEN = 'None'):
 
 
     with st.expander('Recommendation for Sampling Timepoints'):
-        st.image(Image.open('./pics/T_effective_timepoints.png'), caption='Image 2: Timepoints')  
+        try:    
+            st.image(Image.open('./pics/T_Effective_timepoints.PNG'), caption='Image 2: Timepoints')  
+        except:
+            pass
         st.write('https://link.springer.com/article/10.1007/s11307-023-01868-9')
-        st.image(Image.open('./pics/T_effective_integration.png'), caption='Image 3: Integration')  
+        try:
+            st.image(Image.open('./pics/T_Effective_integration.PNG'), caption='Image 3: Integration')  
+        except:
+            pass
         st.write('https://doi.org/10.1007/s00259-022-05727-7')
 
     results_timepoints = dict()
