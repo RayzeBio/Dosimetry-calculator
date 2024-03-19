@@ -7,6 +7,7 @@ import dosimetry_hTIACorg
 import dosimetry_CDD
 import dosimetry_CDD_imaging
 import scaling_mTIAC
+import timepoints_BioD
 
 # dictionary of all available apps that can be accessed on the main streamlit page
 PAGES = {
@@ -18,6 +19,7 @@ PAGES = {
     "scaling: mTIAC -> hTIAC": scaling_mTIAC,
     # "GR":   gr_calculator,
     "Radioisotope decay": decay_calculator,    
+    "Sampling Timepoints BioD": timepoints_BioD,    
 }
 
 st.sidebar.title('Navigation')
