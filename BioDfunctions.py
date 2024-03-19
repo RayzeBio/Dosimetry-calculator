@@ -2491,6 +2491,8 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
                             r2_adj = 0.
                     else: 
                         r2_adj,r2_f,n_obs,p_var = [-1.,-1.,-1.,-1.]
+                        AUC_calculated = None
+                        AUC_extrapolated = None
 
                     R_squared_testfits[fitmodel_test] = [round(r2_adj,4),round(r2_f,4),p_var,n_obs,AUC_calculated,AUC_extrapolated]
 
