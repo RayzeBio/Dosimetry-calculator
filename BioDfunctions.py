@@ -2483,16 +2483,16 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
                             except:
                                 r2_f = -1.
 
-                    elif fitmodel == trapfit:    #https://personal.math.ubc.ca/~pwalls/math-python/integration/trapezoid-rule/
+                    elif fitmodel_test == trapfit:    #https://personal.math.ubc.ca/~pwalls/math-python/integration/trapezoid-rule/
                         xtrap, ytrap, AUC_calculated = trapezoidal_func(x_raw,y_raw)
                         AUC_extrapolated = 0.
                         trap_integrated = True
 
-                    elif fitmodel == linexpfit:
+                    elif fitmodel_test == linexpfit:
                         xtrap, ytrap, AUC_calculated,AUC_extrapolated = trap_linextrapol_func(x_raw,y_raw, halflive = isotopes_BioD_halflives[radioisotope1])
                         trap_integrated = True
 
-                    elif fitmodel == linphysdecay:
+                    elif fitmodel_test == linphysdecay:
                         xtrap, ytrap, AUC_calculated,AUC_extrapolated = trap_physdecayextrapol_func(x_raw,y_raw, halflive = isotopes_BioD_halflives[radioisotope1])
                         trap_integrated = True
 
