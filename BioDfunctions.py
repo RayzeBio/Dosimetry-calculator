@@ -2413,6 +2413,8 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
                 # Try all fits and select the fit with R squared closest to 1.
             if fitmodel_presubmit == 'free to adjust each individual organ':
                 R_squared_testfits = {}
+                trap_integrated = False
+                fit_successful_test = False
                 for fitmodel_test in fitmodel_options:
                     fit_successful_test = False
                     if fitmodel_test == monofit:
@@ -2481,6 +2483,19 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
                             except:
                                 r2_f = -1.
 
+                    elif fitmodel == trapfit:    #https://personal.math.ubc.ca/~pwalls/math-python/integration/trapezoid-rule/
+                        xtrap, ytrap, AUC_calculated = trapezoidal_func(x_raw,y_raw)
+                        AUC_extrapolated = 0.
+                        trap_integrated = True
+
+                    elif fitmodel == linexpfit:
+                        xtrap, ytrap, AUC_calculated,AUC_extrapolated = trap_linextrapol_func(x_raw,y_raw, halflive = isotopes_BioD_halflives[radioisotope1])
+                        trap_integrated = True
+
+                    elif fitmodel == linphysdecay:
+                        xtrap, ytrap, AUC_calculated,AUC_extrapolated = trap_physdecayextrapol_func(x_raw,y_raw, halflive = isotopes_BioD_halflives[radioisotope1])
+                        trap_integrated = True
+
                     if fit_successful_test:
                         mse_f,mae_f,rmse_f,r2_f = fit_quality_calc(y_raw,y_fit_quality)  # get mean squared error, mean absolute error, root mean squared error and r squared
                         n_obs = len(y_raw)  #number of observations
@@ -2489,6 +2504,8 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
                             r2_adj = 1 - (1- r2_f) * ((n_obs-1)/(n_obs - p_var - 1)) # R squared adjusted is normalized with number of independent variables of model
                         except:
                             r2_adj = 0.
+                    elif trap_integrated:
+                        r2_adj,r2_f,n_obs,p_var = [-1.,-1.,-1.,-1.]
                     else: 
                         r2_adj,r2_f,n_obs,p_var = [-1.,-1.,-1.,-1.]
                         AUC_calculated = None
