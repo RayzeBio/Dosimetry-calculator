@@ -1742,10 +1742,9 @@ def dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,
         results_dosimetry[keyword_dose] = dose
         doselimit_organ_names_found, doselimit_organ_names = get_matching_organnames(tissue_target,doselimits_file.Organ)
         if tissue_target == 'Red Mar.':
-            doselimit_expander.write(tissue_target)
-            doselimit_expander.write(doselimit_organ_names_found)
-            doselimit_expander.write(doselimit_organ_names)
-            
+            doselimit_organ_names_found = True
+            doselimit_organ_names = ['Bone Marrow']
+
         if doselimit_organ_names_found:
             doselimit_from_file = doselimits_file[doselimits_file.Organ == doselimit_organ_names[0]].iloc[0].iloc[1]    # in Gray
             doselimit_from_file = doselimit_expander.number_input(f'{doselimit_organ_names[0]}: MAX {doselimit_from_file} Gy ',value=doselimit_from_file, min_value=0.)#- max. injectable dose: {max_dose_toinject/1000:.2f} GBq')
