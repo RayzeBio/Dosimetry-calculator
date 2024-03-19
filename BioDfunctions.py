@@ -1781,16 +1781,38 @@ def dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,
         results_dosimetry_alltissues.append(results_dosimetry)
 
     results_doselimits_df = pd.DataFrame.from_dict(results_dosimetry_alltissues)
+    if tumor_input:
+        results_doselimits_df['Tumor dose at MTA per organ [Gy]'] = results_doselimits_df[mta_organ_keyword] * dose_total_tumor
+
+    # Get dose limiting organ and MTA of dose limiting organ
     mta = results_doselimits_df[mta_organ_keyword].min()
     results_doselimits_df[mta_keyword] = mta
     tissue_DL = results_doselimits_df['Target tissue'][results_doselimits_df[mta_organ_keyword]==mta]
     tissue_DL = tissue_DL.values[0]
     results_doselimits_df['Dose limiting organ'] = tissue_DL
 
+    st.write(f'**Dose limiting organ:** {tissue_DL}')
+    st.write(f'MTA = **{mta:.2f} GBq** (dose limiting: {tissue_DL})')
     if tumor_input:
         tumor_exposure_at_DL = mta * dose_total_tumor   # GBq * mGy/MBq 
         results_doselimits_df[keyword_tumor_dose_mta] = tumor_exposure_at_DL
-        st.write(f'**Tumor exposure at MTA: {tumor_exposure_at_DL:.2f} Gy** (dose limiting: {tissue_DL})')
+        st.write(f'Tumor exposure at MTA: **{tumor_exposure_at_DL:.2f} Gy** (dose limiting: {tissue_DL})')
+
+    #Get second dose limiting organ
+    mta_list = list(results_doselimits_df[mta_organ_keyword])
+    mta_list = [x for x in mta_list if not np.isnan(x)]
+    mta_list.sort()
+    if len(mta_list) >= 1:
+        mta_second = mta_list[1]
+        tissue_DL_second = results_doselimits_df['Target tissue'][results_doselimits_df[mta_organ_keyword]==mta_second].values[0]
+        results_doselimits_df['Second Dose limiting organ'] = tissue_DL_second
+
+        st.write(f'**Second Dose limiting organ:** {tissue_DL_second}')
+        st.write(f'Second dose limiting organ: MTA = **{mta_second:.2f} GBq** (dose limiting: {tissue_DL_second})')
+        if tumor_input:
+            tumor_exposure_at_DL_second = mta_second * dose_total_tumor   # GBq * mGy/MBq 
+            results_doselimits_df['Second dose limiting organ: '+keyword_tumor_dose_mta] = tumor_exposure_at_DL_second
+            st.write(f'Tumor exposure at second MTA: **{tumor_exposure_at_DL_second:.2f} Gy** (dose limiting: {tissue_DL_second})')
 
     results_doselimits_df['radioisotope 2'] = radioisotope2
     results_doselimits_df['Dosimetry method'] = irdc_version
