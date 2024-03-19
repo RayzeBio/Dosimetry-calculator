@@ -323,7 +323,10 @@ def app(CDD_TOKEN='None'):
 
                         if st.session_state.calculate_bm:
                             bm_method,blood_key = select_bonemarrow_projection(fitresults)
-                            fitresults = project_bonemarrow(fitresults,blood_key,bm_method)
+                            if len(blood_key) > 0:
+                                fitresults = project_bonemarrow(fitresults,blood_key,bm_method)
+                            else:
+                                st.error('Please select surrogate for blood')
                         else:
                             blood_key = None
 

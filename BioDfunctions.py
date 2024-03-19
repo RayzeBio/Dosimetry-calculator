@@ -1566,6 +1566,7 @@ def project_bonemarrow(fitresults,blood_key,bm_method):
     else:
         columns_blood = [blood_key,keyword_projected_bm]
     st.write(fitresults[columns_blood].T[[keyword_mtiac_g,'fitmodel']])
+    fitresults['parameter'] = list(fitresults.index)
     return fitresults
 
 
