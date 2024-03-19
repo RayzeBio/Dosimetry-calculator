@@ -1409,7 +1409,7 @@ def get_all_possible_tissue_spellings(tissue_input):
         elif tissue == 'bladder wall':
             poss_singular.append('UB Cont')
             poss_singular.append('Urinary Bladder Wall')
-        elif tissue == 'bone marrow' or tissue == keyword_projected_bm or fnmatch(tissue,'*bone marrow*') or fnmatch(tissue,'*Red Mar*'):
+        elif tissue == 'bone marrow' or tissue == keyword_projected_bm or fnmatch(tissue,'*bone marrow*') or fnmatch(tissue,'*Red Mar*') or fnmatch(tissue,'*Red Mar.*'):
             poss_singular.append('Red Marrow') 
             poss_singular.append('red marrow') 
             poss_singular.append('red mar.') 
@@ -1741,9 +1741,6 @@ def dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,
         dose =  dosimetry_input_df[tissue_target+' Dose'].sum()
         results_dosimetry[keyword_dose] = dose
         doselimit_organ_names_found, doselimit_organ_names = get_matching_organnames(tissue_target,doselimits_file.Organ)
-        doselimit_expander.write(tissue_target)
-        doselimit_expander.write(doselimit_organ_names_found)
-        doselimit_expander.write(doselimit_organ_names)
 
         if doselimit_organ_names_found:
             doselimit_from_file = doselimits_file[doselimits_file.Organ == doselimit_organ_names[0]].iloc[0].iloc[1]    # in Gray
