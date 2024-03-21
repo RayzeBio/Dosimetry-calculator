@@ -245,6 +245,12 @@ def app(CDD_TOKEN='None'):
                             else:
                                 rawdata_kBqcc=[]
                                 rawdata_kBqccBiolDecay=[]
+                        elif condition == '%ID/cc':
+                                rawdata_kBqcc=[]
+                                rawdata_kBqccBiolDecay=[]
+                        else:
+                                rawdata_kBqcc=[]
+                                rawdata_kBqccBiolDecay=[]
 
                         ### Create plot of input data
                         plot_input_data_biod(results_for_dosimetry_Calc_df,condition,rayz_id)
