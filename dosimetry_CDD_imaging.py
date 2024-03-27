@@ -383,6 +383,15 @@ def app(CDD_TOKEN='None'):
 
                             all_results_download(results_doselimits_df,results_scaling_df,fitresults, data_input, rawdata,results_filtered_df,all_figures_fit, rayz_id, olinda_input_df=olinda_input_df)
 
+    st.write('----')
+    if st.button('Clear all calculations: Click button and reload homepage ( "Ctrl + R" or F5 )'):
+        st.cache_data.clear()
+        st.cache_resource.clear()
+        st.session_state.moleculefound = False
+        st.session_state.searchBioD = False
+        st.session_state.continueCDDsearch = False 
+        st.stop()
+
     
 if __name__ == '__main__':
     st.set_page_config(layout="wide")

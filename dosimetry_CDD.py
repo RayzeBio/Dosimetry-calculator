@@ -370,7 +370,15 @@ def app(CDD_TOKEN='None'):
                             all_results_download(results_doselimits_df,results_scaling_df,fitresults, data_input, rawdata,results_filtered,all_figures_fit, rayz_id, olinda_input_df=olinda_input_df)
 
 
-
+    st.write('----')
+    if st.button('Clear all calculations: Click button and reload homepage ( "Ctrl + R" or F5 )'):
+        st.cache_data.clear()
+        st.cache_resource.clear()
+        st.session_state = _get_state(st.session_state)
+        st.session_state.calc_scaling = False
+        st.session_state.decay_correction = False
+        st.session_state.searchBioD = False
+        st.stop()
 
     
 if __name__ == '__main__':
