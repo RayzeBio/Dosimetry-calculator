@@ -87,7 +87,7 @@ injdose_keyword = 'id/g '
 keyword_projected_bm = 'bone marrow (from blood)'
 
 
-alpha_scal= 'alpha weighted scaling (Stephen Graves)' 
+alpha_scal= 'metabolic scaling (2) (alpha weighted scaling - Stephen Graves)' 
 time_mass_fda = 'combined time and relative mass scaling - FDA guideline'
 rel_mass_scal = 'relative mass scaling (FDA)'
 rel_mass_scal_fda = 'relative mass scaling - FDA guideline'
@@ -95,7 +95,7 @@ no_scaling = 'no scaling'
 time_scal = 'time scaling'
 time_mass_scal = 'combined time and relative mass scaling'
 allom_scal = 'allometric scaling'
-metabol_scal = 'metabolic scaling (Stephen Graves)'
+metabol_scal = 'metabolic scaling (1) with exponent 0.25'
 scaling_options = alpha_scal, metabol_scal, rel_mass_scal, time_scal, time_mass_scal, no_scaling
 
 monofit, bifit, biexpelim, biexpelim2, trapfit, linexpfit, linphysdecay = ['monoexponential - linear regression on log(y)','biexponential','biexponential with absorption and elimination (clearance)','biexponential with absorption and elimination (A1)','trapezoidal','linear extrapolation','trapezoidel with physical decay']
@@ -1161,7 +1161,7 @@ def trapezoidal_func(x,y):
             AUC_calculated += ((y2+y1)/2)*(x2-x1)  
     return [xtrap, ytrap, AUC_calculated]
 
-def trap_linextrapol_func(x_raw,y_raw, halflive):
+def trap_linextrapol_func(x_raw,y_raw, halflive, write_error_warning = True):
     try:
         b, a, r, p, std = linregress(x_raw[-2:],y_raw[-2:]) # y=a+b*x
     except:
@@ -1171,7 +1171,8 @@ def trap_linextrapol_func(x_raw,y_raw, halflive):
             st.error('no rawdata uploaded for this organ, please uncheck from tissue list')
 
     if b > 0:
-        st.error('slope is not negative, physical decay to 2% of last y value was used for interpolation')
+        if write_error_warning:
+            st.error('slope is not negative, physical decay to 2% of last y value was used for interpolation')
         decaytime = np.log(0.02)/(np.log(0.5)/halflive)  #decay to 2% of last y value
         x_end = list(x_raw)[-1] + decaytime
     else:
@@ -1679,6 +1680,10 @@ def dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,
                 olinda_input_organ[tissue_source]   = 'Tumor'
             elif tissue_source == 'bone':
                 preselect_olinda_organname_idx = sources_fromCSV_list.index('Total Body')
+                olinda_source_organname = st.selectbox(f'Select Olinda input name corresponding to ****{tissue_source}****',options=sources_fromCSV_list, key=f'{tissue_source}-olinda', index=preselect_olinda_organname_idx)
+                olinda_input_organ[tissue_source]   = olinda_source_organname
+            elif tissue_source == 'tail':
+                preselect_olinda_organname_idx = sources_fromCSV_list.index('do not use for dosimetry')
                 olinda_source_organname = st.selectbox(f'Select Olinda input name corresponding to ****{tissue_source}****',options=sources_fromCSV_list, key=f'{tissue_source}-olinda', index=preselect_olinda_organname_idx)
                 olinda_input_organ[tissue_source]   = olinda_source_organname
             else:
@@ -2493,7 +2498,7 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
                         trap_integrated = True
 
                     elif fitmodel_test == linexpfit:
-                        xtrap, ytrap, AUC_calculated,AUC_extrapolated = trap_linextrapol_func(x_raw,y_raw, halflive = isotopes_BioD_halflives[radioisotope1])
+                        xtrap, ytrap, AUC_calculated,AUC_extrapolated = trap_linextrapol_func(x_raw,y_raw, halflive = isotopes_BioD_halflives[radioisotope1], write_error_warning = False)
                         trap_integrated = True
 
                     elif fitmodel_test == linphysdecay:
