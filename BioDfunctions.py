@@ -1677,6 +1677,10 @@ def dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,
             # dose = calc_dosimetry(tissue_source=tissue_target, sourceslist=results_scaling_df, Sfactors=df_sfactors, hTIAC_org_list=results_scaling_df[htiac_org_key],key_human_organ_weight=key_human_organ_weight,wb_weight=wb_weight,radioisotope_proj_human=radioisotope2)
             if tissue_source == 'tumor':
                 olinda_input_organ[tissue_source]   = 'Tumor'
+            elif tissue_source == 'bone':
+                preselect_olinda_organname_idx = sources_fromCSV_list.index('Total Body')
+                olinda_source_organname = st.selectbox(f'Select Olinda input name corresponding to ****{tissue_source}****',options=sources_fromCSV_list, key=f'{tissue_source}-olinda', index=preselect_olinda_organname_idx)
+                olinda_input_organ[tissue_source]   = olinda_source_organname
             else:
                 target_organ_defined, organ_name_options = get_matching_organnames(tissue_source,sources_fromCSV_list)
                 preselect_olinda_organname_idx = sources_fromCSV_list.index('Total Body')
