@@ -2902,7 +2902,8 @@ def tiac_results_download(fitresults, data_input, rawdata=[], all_figures_fit=[]
         fitresults.to_excel(writer, sheet_name = "Decay fit", index = False)
         if len(data_input) != 0:
             data_input.to_excel(writer, sheet_name = "Data input decay corrected", index = False)
-        rawdata.to_excel(writer, sheet_name = "Data input", index = False)
+        if len(rawdata) != 0:
+            rawdata.to_excel(writer, sheet_name = "Data input", index = False)
         workbook  = writer.book
         for fig_nr,figure_fit in enumerate(all_figures_fit):
             img_stream = pd.io.common.BytesIO(all_figures_fit[figure_fit])
