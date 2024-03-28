@@ -1,4 +1,4 @@
-﻿import base64
+import base64
 import os
 import json
 import pickle
@@ -1662,7 +1662,9 @@ def dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,
     if 'Any bone activity on bone surfaces' in sources_fromCSV_list: sources_fromCSV_list.remove('Any bone activity on bone surfaces') 
     if 'OLINDA - Organ Level INternal Dose Assessment Code (Version 2.2; copyright Vanderbilt University - 2012)' in sources_fromCSV_list: sources_fromCSV_list.remove('OLINDA - Organ Level INternal Dose Assessment Code (Version 2.2; copyright Vanderbilt University - 2012)') 
     # if 'Total Dose Conversion Factors [mSv/MBq-s] - Nuclide:Lu-177 (6.65 d) for ICRP 89 Adult Male' in sources_fromCSV_list: sources_fromCSV_list.remove('Total Dose Conversion Factors [mSv/MBq-s] - Nuclide:Lu-177 (6.65 d) for ICRP 89 Adult Male') 
-    total_dose_cf_col = [col_name for col_name in sources_fromCSV_list if fnmatch(str(col_name), '*Total Dose Conversion Factors*')][0]
+    total_dose_cf_col = [col_name for col_name in sources_fromCSV_list if fnmatch(str(col_name), '*Total Dose Conversion Factors*')]
+    if len(total_dose_cf_col) > 0:
+        total_dose_cf_col = total_dose_cf_col[0]
     if total_dose_cf_col in sources_fromCSV_list: sources_fromCSV_list.remove(total_dose_cf_col) 
 
     sources_fromCSV_list = [x for x in sources_fromCSV_list if str(x) != 'nan'] 
@@ -2875,11 +2877,12 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
         # Add a download button to download the figure (traces with fit result)
         if st.button(f'Download Chart {tissue}',key=f'{tissue}-dwnld'):
             # Convert the figure to an image
-            try:
+            try:    
                 image = fig_fit.to_image(format='png')
             except:
                 pass
-                
+
+
             # Prompt the user to enter a new file name
             new_file_name = st.text_input('Enter a new file name', f'{tissue}-fit.png')
 

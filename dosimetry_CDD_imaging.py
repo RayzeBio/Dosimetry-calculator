@@ -291,6 +291,7 @@ def app(CDD_TOKEN='None'):
                     st.session_state.continueDosimetry = True
                 except:
                     st.error('Please press button')
+                    st.session_state.continueDosimetry = False
 
                 if st.session_state.continueDosimetry:                    
                     with st.expander('show input'):
