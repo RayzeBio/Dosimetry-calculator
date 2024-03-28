@@ -1,4 +1,4 @@
-import base64
+﻿import base64
 import os
 import json
 import pickle
@@ -2843,8 +2843,10 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
 
            
             #Store the png bytes object in a dict
-            all_figures_fit[tissue] = fig_fit.to_image(format='png')
-
+            try:
+                all_figures_fit[tissue] = fig_fit.to_image(format='png')
+            except:
+                pass
 
             with col_fit_3:
                 try:
@@ -2873,8 +2875,11 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
         # Add a download button to download the figure (traces with fit result)
         if st.button(f'Download Chart {tissue}',key=f'{tissue}-dwnld'):
             # Convert the figure to an image
-            image = fig_fit.to_image(format='png')
-
+            try:
+                image = fig_fit.to_image(format='png')
+            except:
+                pass
+                
             # Prompt the user to enter a new file name
             new_file_name = st.text_input('Enter a new file name', f'{tissue}-fit.png')
 
