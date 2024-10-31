@@ -170,6 +170,7 @@ def app(CDD_TOKEN='None'):
                     # pre-defined standard conditions in BioD protocols that can be individually selected by user to include in dosimetry calculations
                     parameters_experiment_BioD = [  'Data Source',
                                                     'Species',
+                                                    'Subject',
                                                     'Analysis Method',
                                                     'Time point']
                     
@@ -230,9 +231,16 @@ def app(CDD_TOKEN='None'):
                                 st.write(f'Input data from Imaging ({condition}) need to be divided by administered activity to get %ID/cc from kBq/cc')
                                 if 'Injected activity' in results_filtered_df.columns:
                                     admAct_uCi = results_filtered_df['Injected activity']
-                                    admAct_uCi = float(admAct_uCi.unique())
+                                    admAct_uCi = admAct_uCi.unique()
+                                    if len(admAct_uCi) != 1:
+                                        st.error(f'The administered activity is not unique: ({admAct_uCi})')
+                                        st.success(f'Did you select only one subject?')
+                                    else:
+                                        admAct_uCi= float(admAct_uCi)
+                                        
                                     admAct_kBq = admAct_uCi*0.037*1000
-                                    st.write(f'Administered activity is {admAct_kBq:.2f} kBq')
+                                    admAct_MBq = admAct_kBq/1000
+                                    st.write(f'Administered activity is {admAct_kBq:.2f} kBq (= {admAct_MBq:.2f} MBq)')
                                 else:
                                     st.error(f'Injected activity needs to be selected as readout')
                                 rawdata_kBqccBiolDecay,results_for_dosimetry_Calc_df = admAct_corr_kBqcc(results_for_dosimetry_Calc_df,administered_activity=admAct_kBq)

@@ -24,7 +24,7 @@ from PIL import Image
 
 vault_id=5938
 tumor_spheres_file = pd.read_csv("spheres-310g-tumorDoses.csv")
-irdc_version = "IRDC v0.9"
+irdc_version = "IRDC v1.0"
 
 #############################################################
 # variable definitions used for dosimetry:
@@ -98,7 +98,7 @@ allom_scal = 'allometric scaling'
 metabol_scal = 'metabolic scaling (1) with exponent 0.25'
 scaling_options = alpha_scal, metabol_scal, rel_mass_scal, time_scal, time_mass_scal, no_scaling
 
-monofit, bifit, biexpelim, biexpelim2, trapfit, linexpfit, linphysdecay = ['monoexponential - linear regression on log(y)','biexponential','biexponential with absorption and elimination (clearance)','biexponential with absorption and elimination (A1)','trapezoidal','linear extrapolation','trapezoidel with physical decay']
+monofit, bifit, biexpelim, biexpelim2, trapfit, linexpfit, linphysdecay = ['monoexponential - linear regression on log(y)','biexponential','biexponential with absorption and elimination (clearance)','biexponential with absorption and elimination (A1)','trapezoidal','linear extrapolation','trapezoidal with physical decay']
 monoexp_dec_fit = 'monoexponential direct method'
 biexp_abs_elim_two_components = 'biexponential with absorption and elimination (A1 and A2)'
 fitmodel_options = [monoexp_dec_fit, monofit, bifit, biexpelim2, biexp_abs_elim_two_components, trapfit, linexpfit,linphysdecay] # excluded biexpelim from David Huang
@@ -1425,11 +1425,11 @@ def get_all_possible_tissue_spellings(tissue_input):
         elif tissue == 'heart':
             poss_singular.append('HeartCon')
             poss_singular.append('Heart Wall')  
-        elif tissue == 'stomach' or tissue == 'stomach contents':
+        elif tissue == 'stomach' or tissue == 'stomach contents' or tissue == 'stomcont':
             poss_singular.append('Stomach Contents') 
             poss_singular.append('StomCont')
             poss_singular.append('Stomach Wall') 
-        elif fnmatch(tissue,'*small intestine*') or fnmatch(tissue,'*small intestine contents*'):
+        elif fnmatch(tissue,'*small intestine*') or fnmatch(tissue,'*small intestine contents*') or fnmatch(tissue,'SI'):
             poss_singular.append('Small Intestine') 
             poss_singular.append('SI Cont')
         elif tissue == 'large intestine' or tissue == 'large intestine contents':
