@@ -14,7 +14,7 @@ def app(CDD_TOKEN = 'None'):
     #Select isotope for planned study:
     radioisotope1 = st.radio(f"Which radioisotope should be used in your study?",(isotopes_human_halflives.keys()))     
 
-    half_life_isotope = float(isotopes_BioD_halflives[radioisotope1])
+    half_life_isotope = float(isotopes_human_halflives[radioisotope1])
     lambda_radioisotope1 = np.log(2)/half_life_isotope
     st.write(f'You selected {radioisotope1}: Thalf = {half_life_isotope:.2f} h')
 

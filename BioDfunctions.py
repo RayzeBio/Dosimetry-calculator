@@ -48,7 +48,8 @@ isotopes_BioD_halflives = {"Lu-177": 159.53,
                         "Cu-64": 12.7}
 
 isotopes_human_halflives = {"Lu-177": 159.6,          #halflives in hours   
-                        "Ac-225": 238.08,                                  
+                        "Ac-225": 238.08,   
+                        "In-111": 67.2,                               
                         "Pb-203": 51.87,                                  
                         "Pb-212": 10.64,                                  
                         "Ra-223": 11.43*24,                                  
