@@ -1891,18 +1891,19 @@ def scaling_mTIAC_hTIAC(scaling_method,fitresults,radioisotope1_study,x_fit,data
         ###################################################################################
         # Get standard organ mass from excel file 'tissue_masses_mouse_file'
         org_weight_mouse_from_file = get_mass_from_file(tissue, tissue_masses_mouse_file, mouse_keyword_tissues, mouse_keyword_masses, 1e-3)
+
         if len(cdd_weights) != 0 and tissue is not keyword_projected_bm:
             org_weight_mouse_from_cdd = cdd_weights['organ weight'][cdd_weights['tissue'] ==tissue].item()
+            org_weight_mouse_from_file = org_weight_mouse_from_cdd
 
             # Calculate the difference of reference mouse organ mass and experimental weight from CDD, give an error if diff is >10%
-            diff_cdd_standard = abs(org_weight_mouse_from_cdd-org_weight_mouse_from_file)/org_weight_mouse_from_file
-            if int(org_weight_mouse_from_file) == 0.:
-                org_weight_mouse_from_file = org_weight_mouse_from_cdd
-            elif diff_cdd_standard > 0.2: #more than 10% difference of cdd data vs. standard model
-                if tissue not in ['blood','muscle']:
-                    endcolumn.error(f'Caution here: {tissue} weight in standard mouse is {org_weight_mouse_from_file:.2f}g vs. {org_weight_mouse_from_cdd:.2f}g from CDD Vault upload')
-            else:
-                org_weight_mouse_from_file = org_weight_mouse_from_cdd
+            # diff_cdd_standard = abs(org_weight_mouse_from_cdd-org_weight_mouse_from_file)/org_weight_mouse_from_file
+            # if int(org_weight_mouse_from_file) == 0.:
+            #     org_weight_mouse_from_file = org_weight_mouse_from_cdd
+            # elif diff_cdd_standard > 0.2: #more than 10% difference of cdd data vs. standard model
+            #     if tissue not in ['blood','muscle']:
+            #         endcolumn.error(f'Caution here: {tissue} weight in standard mouse is {org_weight_mouse_from_file:.2f}g vs. {org_weight_mouse_from_cdd:.2f}g from CDD Vault upload')
+            # else:
 
             #     # always use standard weights for blood and muscle since BioD is done on parts of the organ only
             # if tissue == 'blood':   
