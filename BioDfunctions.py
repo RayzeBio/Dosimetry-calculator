@@ -24,7 +24,7 @@ from PIL import Image
 
 vault_id=5938
 tumor_spheres_file = pd.read_csv("spheres-310g-tumorDoses.csv")
-irdc_version = "IRDC v1.0"
+irdc_version = "IRDC v1.1"
 
 #############################################################
 # variable definitions used for dosimetry:
@@ -1335,7 +1335,7 @@ def definition_scaling_method(scaling_method, fitmodel):
         st.latex(r'''  TIAC = {time-integrated} \space {activity} \space {coefficient}''')
     elif scaling_method == 'allometric scaling':
         st.write(f'Method #5 in https://doi.org/10.1155/2019/6438196 (BUT misreferenced in this publication - has to be revisited)')
-    elif scaling_method == 'alpha weighted scaling (Stephen Graves)':
+    elif scaling_method == alpha_scal:
         st.write(f'Method by Stephen Graves (consultant 01/2022) ')
         st.write('1. Decay correction of %ID/g (corrected for decaying nucleotide during experimental time course)') # from report 'RayzeBio-SG_PSMA617_BioD_Report_1.0.pdf' page 2
         st.latex(r'''  
@@ -1357,7 +1357,7 @@ def definition_scaling_method(scaling_method, fitmodel):
                 ''')
             # TIAC_{human,organ} = \frac{\alpha}{\lambda_{mouse, organ}} * TIAC_{mouse,organ} 
         
-    elif scaling_method == 'metabolic scaling (Stephen Graves)':
+    elif scaling_method == alpha_scal:
         st.write(f'Method by Stephen Graves (consultant 01/2022) ')          
         st.write('Extrapolation to TIAC(human)') # from slides '20220113_RayzeBio-Dosimetry_Graves_v1.0.pptx' slide 4
         st.latex(r'''  
@@ -1904,11 +1904,11 @@ def scaling_mTIAC_hTIAC(scaling_method,fitresults,radioisotope1_study,x_fit,data
             else:
                 org_weight_mouse_from_file = org_weight_mouse_from_cdd
 
-                # always use standard weights for blood and muscle since BioD is done on parts of the organ only
-            if tissue == 'blood':   
-                org_weight_mouse_from_file = get_mass_from_file(tissue, tissue_masses_mouse_file, mouse_keyword_tissues, mouse_keyword_masses, 1e-3)
-            elif tissue == 'muscle':
-                org_weight_mouse_from_file = get_mass_from_file(tissue, tissue_masses_mouse_file, mouse_keyword_tissues, mouse_keyword_masses, 1e-3)
+            #     # always use standard weights for blood and muscle since BioD is done on parts of the organ only
+            # if tissue == 'blood':   
+            #     org_weight_mouse_from_file = get_mass_from_file(tissue, tissue_masses_mouse_file, mouse_keyword_tissues, mouse_keyword_masses, 1e-3)
+            # elif tissue == 'muscle':
+            #     org_weight_mouse_from_file = get_mass_from_file(tissue, tissue_masses_mouse_file, mouse_keyword_tissues, mouse_keyword_masses, 1e-3)
 
         org_weight_mouse = float(col_calc_1.number_input(f'{tissue} weight mouse [g]', min_value = 0., max_value = wb_mouse, value = org_weight_mouse_from_file, step = 0.1))
         org_weight_human_from_file = get_mass_from_file(tissue, tissue_masses_human_file, human_keyword_tissues, human_keyword_masses, 1.)
