@@ -15,6 +15,7 @@ from fnmatch import fnmatch
 from scipy.optimize import curve_fit
 from scipy.stats import linregress
 from scipy.integrate import quad
+from plotly.colors import sample_colorscale
 
 import plotly.graph_objs as go
 import streamlit as st
@@ -24,7 +25,7 @@ from PIL import Image
 
 vault_id=5938
 tumor_spheres_file = pd.read_csv("spheres-310g-tumorDoses.csv")
-irdc_version = "IRDC v1.1"
+irdc_version = "IRDC v1.2"
 
 #############################################################
 # variable definitions used for dosimetry:
@@ -66,21 +67,22 @@ isotopes_human_halflives = {"Lu-177": 159.6,          #halflives in hours
 
 doselimits_file = pd.read_csv("organ-doselimits-calculator.csv")
 tissue_masses_mouse_file = pd.read_csv("tissue-masses-mouse.csv")
-tissue_masses_human_file = pd.read_csv("tissue-masses-human.csv")
+tissue_masses_human_file = pd.read_csv("tissue-masses-human-ICRP89-male-female.xlsb.csv")
 wholebody_mouse = 25. # gram 
 mouse_keyword_tissues = 'Available tissues for mouse'
 mouse_keyword_masses = 'Mass 30g mouse model [g]'  
 human_keyword_tissues = 'Available tissues for human'
-human_keyword_masses = 'Mass Male human model [g]'  
+human_keyword_masses_male = 'Mass Male human model [g]'  
+human_keyword_masses_female= 'Mass Female human model [g]'
 wholebody_human = 70. # kilogram   
-wholebody_human = float(list(tissue_masses_human_file[human_keyword_masses][tissue_masses_human_file[human_keyword_tissues] == 'total body'])[0])
+# wholebody_human = float(list(tissue_masses_human_file[human_keyword_masses][tissue_masses_human_file[human_keyword_tissues] == 'total body'])[0])
 key_human_organ_weight = 'human organ weight [g]'
 key_mouse_organ_weight = 'mouse organ weight [g]'
 key_human_wb_weight = 'wb_human [g]'
 key_mouse_wb_weight = 'wb_mouse [g]'
-htiac_key = 'hTIAC_g [MBq * h/MBq]'
+htiac_key = 'hTIAC_g [(MBq * h)/(MBq * g)]'
 htiac_org_key = 'hTIAC_org [MBq * h/MBq]'
-keyword_mtiac_g = 'mTIAC_g [MBq * h/MBq]'
+keyword_mtiac_g = 'mTIAC_g [(MBq * h)/(MBq * g)]'
 keyword_mtiac_org = 'mTIAC_org [MBq * h/MBq]'
 keyword_Radioisotope1 = 'radioisotope 1 (used in BioD)'
 time_keyword = 'Time'
@@ -835,7 +837,7 @@ def get_condition_raw_aver(tissues,timepoints,bioD_data_filtered,readout_definit
             condition_uploaded_id = uploaded_condition
             readout_definitions_df = pd.DataFrame.from_dict(readout_definitions)
             readout_name = list(readout_definitions_df[readout_definitions_df['id'] == int(condition_uploaded_id)]['name'])[0]
-            if readout_name in ['Inj dose per gram',"%ID/g",'tumor volume','body weight','Sample mass',"%ID/cc","kBq/cc",'VOI volume','Tissue','Time point','Subject','Injected activity']:
+            if readout_name in ['Inj dose per gram',"%ID/g",'tumor volume','body weight','Sample mass',"%ID/cc","kBq/cc",'VOI volume','Tissue','Time point','Subject','Injected activity','sex']:
                 preselect_condition = True
             else: 
                 preselect_condition = False
@@ -1494,7 +1496,7 @@ def select_bonemarrow_projection(fitresults):
     definition_boneMarrow_methods(bm_method)
     return [bm_method,blood_key]
 
-def project_bonemarrow(fitresults,blood_key,bm_method):
+def project_bonemarrow(fitresults,blood_key,bm_method,sex_key='male'):
     if type(blood_key) == list:
         tiac_g_blood = 0
         for blood_key_el in blood_key:
@@ -1502,6 +1504,16 @@ def project_bonemarrow(fitresults,blood_key,bm_method):
         tiac_g_blood/=len(blood_key) #Average over all submitted keys
     else:
         tiac_g_blood = float(fitresults[blood_key].T[keyword_mtiac_g])
+
+    if sex_key == 'male':
+        m_RM_sex = 1170.
+        m_blood_sex = 5300.
+        m_wb_human_sex = 73000.
+    else:
+        m_RM_sex = 900.
+        m_blood_sex = 3900.
+        m_wb_human_sex = 60000.
+
     bm_params = dict()
     if bm_method == bm_sgourus:
         RMECFF = float(st.text_input('RMECFF',value='0.19'))
@@ -1513,8 +1525,10 @@ def project_bonemarrow(fitresults,blood_key,bm_method):
     elif bm_method == bm_sgourus_greg:
         RMECFF = float(st.text_input('RMECFF',value='0.19'))
         HCT = float(st.text_input('HCT',value='0.47'))
-        m_RM_patient = float(st.text_input('Red Marrow mass patient (g)',value='1170'))
-        m_BL_patient = float(st.text_input('Blood mass patient (g)',value='6363'))
+        m_RM_patient = float(st.text_input('Red Marrow mass patient (g)',value=m_RM_sex))
+        m_BL_patient = float(st.text_input('Blood mass patient (g)',value=m_blood_sex))
+
+
         tiac_g_rm = tiac_g_blood * (RMECFF/(1 - HCT)) * m_RM_patient/m_BL_patient
         bm_params['RMECFF'] = RMECFF
         bm_params['HCT'] = HCT
@@ -1523,14 +1537,14 @@ def project_bonemarrow(fitresults,blood_key,bm_method):
 
     elif bm_method == bm_traino:
         RMBLR = float(st.text_input('RMBLR',value='1'))
-        m_RM_patient = float(st.text_input('Red Marrow mass patient (g)',value='1170'))
+        m_RM_patient = float(st.text_input('Red Marrow mass patient (g)',value=m_RM_sex))
         tiac_g_rm = tiac_g_blood * RMBLR * m_RM_patient/1000
         bm_params['RMBLR'] = RMBLR
          
     elif bm_method == bm_grudzinski:
-        m_RM_patient = float(st.text_input('Red Marrow mass patient (g)',value='1170'))
+        m_RM_patient = float(st.text_input('Red Marrow mass patient (g)',value=m_RM_sex))
         m_wb_animal = float(st.text_input('Total mass animal (g)',value='25'))
-        m_wb_human = float(st.text_input('Total mass human (g)',value='73000'))
+        m_wb_human = float(st.text_input('Total mass human (g)',value=m_wb_human_sex))
         tiac_g_rm = tiac_g_blood * m_wb_animal/m_wb_human * m_RM_patient
         bm_params['m_RM_patient'] = m_RM_patient
         bm_params['m_wb_animal'] = m_wb_animal
@@ -1592,8 +1606,8 @@ def definition_boneMarrow_methods(bm_method):
         st.latex(r'''[A]_{BL} = \text{Activity concentration in Blood (Residence time in organ = } mTIAC_{org}\text{)}''')
         st.latex(r''' RMECFF = \text{Red Marrow Extracellular Fluid Fraction (physiological: 0.19; range 0.15-0.25)}''')
         st.latex(r''' HCT = \text{Hematocrit (physiological: 0.47; range 0.2-0.6)}''')    
-        st.latex(r''' m_{RM\left(patient\right)} = \text{Mass of Red Marrow of patient (ICRP 89 male phantom: 1170g)}''')    
-        st.latex(r''' m_{BL\left(patient\right)} = \text{Mass of Blood of patient (ICRP 89 male phantom: 6363g)}''')    
+        st.latex(r''' m_{RM\left(patient\right)} = \text{Mass of Red Marrow of patient (ICRP 89 male phantom)}''')    
+        st.latex(r''' m_{BL\left(patient\right)} = \text{Mass of Blood of patient (ICRP 89 male phantom)}''')    
            
 
     elif bm_method == bm_traino:
@@ -1604,7 +1618,7 @@ def definition_boneMarrow_methods(bm_method):
         st.latex(r'''RMBLR = \frac{RMECFF}{1 - HCT} = \text{Red Marrow to Blood Ratio (RMBLR = 1)}''')
         st.latex(r'''[A]_{RM} = \text{Activity concentration in Red Marrow (Residence time in organ = } mTIAC_{org}\text{)}''')
         st.latex(r'''[A]_{BL} = \text{Activity concentration in Blood (Residence time in organ = } mTIAC_{org}\text{)}''')
-        st.latex(r''' m_{RM\left(patient\right)} = \text{Mass of Red Marrow of patient (ICRP 89 male phantom: 1170g)}''')    
+        st.latex(r''' m_{RM\left(patient\right)} = \text{Mass of Red Marrow of patient (ICRP 89 phantom)}''')    
 
     elif bm_method == bm_grudzinski:
         st.write(f'Method proposed by Joe Grudzinski (consultant 01/2024)')
@@ -1615,7 +1629,7 @@ def definition_boneMarrow_methods(bm_method):
         st.latex(r'''[A]_{BL} = \text{Activity concentration in Blood (Residence time in organ = } mTIAC_{org}\text{)}''')
         st.latex(r''' m_{total body, animal} = \text{total body weight (animal)}''')
         st.latex(r''' m_{total body, human} = \text{total body weight (human)}''')
-        st.latex(r''' m_{RM\left(patient\right)} = \text{Mass of Red Marrow of patient (ICRP 89 male phantom: 1170g)}''')    
+        st.latex(r''' m_{RM\left(patient\right)} = \text{Mass of Red Marrow of patient (ICRP 89 phantom})}''')    
            
 
     elif bm_method == bm_graves:
@@ -1740,16 +1754,25 @@ def dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,
     doselimit_expander = st.expander(f'Change dose limits to organ')
     results_dosimetry_alltissues = list()
     for ik, tissue_target in enumerate(targets_fromCSV_list):
-        saf_vector= df_sfactors[tissue_target].iloc[0:25]
-        dosimetry_input_df[tissue_target] = np.array(list(saf_vector), dtype=float)
+        try:
+            saf_vector= df_sfactors[tissue_target].iloc[0:25]
+            dosimetry_input_df[tissue_target] = np.array(list(saf_vector), dtype=float)
+        except:
+            saf_vector= df_sfactors[tissue_target].iloc[0:26]
+            dosimetry_input_df[tissue_target] = np.array(list(saf_vector), dtype=float)            
         dosimetry_input_df[tissue_target+' Dose'] = dosimetry_input_df[tissue_target] * dosimetry_input_df['# of Disintegrations (MBq-hr/MBq)'] * 60 * 60
 
+        try:
+            hTIAC_org_input = dosimetry_input_df['# of Disintegrations (MBq-hr/MBq)'][ik]
+        except:
+            hTIAC_org_input = 0.
         # Store dosimetry calculations in dictionary results_dosimetry
         results_dosimetry=dict()
         results_dosimetry['RAYZ ID'] = rayz_id
         results_dosimetry['Batch ID'] = batch_registration_id
         results_dosimetry['Molecule-Batch-ID'] = molecule_batch_ID
         results_dosimetry['Target tissue'] = tissue_target 
+        results_dosimetry[htiac_org_key] = hTIAC_org_input
         dose =  dosimetry_input_df[tissue_target+' Dose'].sum()
         results_dosimetry[keyword_dose] = dose
         doselimit_organ_names_found, doselimit_organ_names = get_matching_organnames(tissue_target,doselimits_file.Organ)
@@ -1789,6 +1812,7 @@ def dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,
         results_dosimetry['Batch ID'] = batch_registration_id
         results_dosimetry['Molecule-Batch-ID'] = molecule_batch_ID    
         results_dosimetry['Target tissue'] = 'Tumor' 
+        results_dosimetry[htiac_org_key] = hTIAC_org_tumor 
         results_dosimetry[keyword_dose] = dose_total_tumor 
         results_dosimetry_alltissues.append(results_dosimetry)
 
@@ -1846,13 +1870,16 @@ def dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,
 
     return [olinda_input_df,results_doselimits_df]
 
-def scaling_mTIAC_hTIAC(scaling_method,fitresults,radioisotope1_study,x_fit,data_tissues,cdd_weights=[],blood_key=''):
+def scaling_mTIAC_hTIAC(scaling_method,fitresults,radioisotope1_study,x_fit,data_tissues,cdd_weights=[],blood_key='',sex_key='male'):
     with st.expander('Model definition'):   
         definition_scaling_method(scaling_method, 'fitmodel varies throughout organs')
 
     with st.expander('Change tissue and body weights'):
-        col_calc_1, col_calc_2 = st.columns(2) 
-        endcolumn = st.container()  
+        with st.form('Change weights and submit'):
+            col_calc_1, col_calc_2 = st.columns(2) 
+        # endcolumn = st.container()  
+            st.form_submit_button(f'Confirm Change of Organ Weights')
+
 
     tissues = list(fitresults.T.index)
     # to exclude the columns parameter and Decay corrected in dataframe fitresults (returns only tissue headers)
@@ -1865,7 +1892,13 @@ def scaling_mTIAC_hTIAC(scaling_method,fitresults,radioisotope1_study,x_fit,data
     if radioisotope1 == 'n/a':
         radioisotope1 = st.radio(f"Which radioisotope should be used for scaling?",(isotopes_human_halflives.keys()))     
     lambda_radioisotope1 = np.log(2)/float(isotopes_BioD_halflives[radioisotope1])
+    
+    if sex_key == 'male':
+        human_keyword_masses = human_keyword_masses_male
+    else:
+        human_keyword_masses = human_keyword_masses_female
 
+    wholebody_human = float(list(tissue_masses_human_file[human_keyword_masses][tissue_masses_human_file[human_keyword_tissues] == 'total body'])[0])
     # Store extrapolation information in dictionaries
     results_scaling_alltissues = dict()
     alpha_dict = dict()
@@ -1895,6 +1928,10 @@ def scaling_mTIAC_hTIAC(scaling_method,fitresults,radioisotope1_study,x_fit,data
         if len(cdd_weights) != 0 and tissue is not keyword_projected_bm:
             org_weight_mouse_from_cdd = cdd_weights['organ weight'][cdd_weights['tissue'] ==tissue].item()
             org_weight_mouse_from_file = org_weight_mouse_from_cdd
+        if org_weight_mouse_from_file < 0.:
+            org_weight_mouse_from_file = 0.
+            st.error(f'Organ weight for {tissue} is negative in CDD Vault upload. Please check the data.')
+            
 
             # Calculate the difference of reference mouse organ mass and experimental weight from CDD, give an error if diff is >10%
             # diff_cdd_standard = abs(org_weight_mouse_from_cdd-org_weight_mouse_from_file)/org_weight_mouse_from_file
@@ -1914,7 +1951,6 @@ def scaling_mTIAC_hTIAC(scaling_method,fitresults,radioisotope1_study,x_fit,data
         org_weight_mouse = float(col_calc_1.number_input(f'{tissue} weight mouse [g]', min_value = 0., max_value = wb_mouse, value = org_weight_mouse_from_file, step = 0.1))
         org_weight_human_from_file = get_mass_from_file(tissue, tissue_masses_human_file, human_keyword_tissues, human_keyword_masses, 1.)
         org_weight_human = float(col_calc_2.number_input(f'{tissue} weight human [g]', min_value = 0., max_value = wb_human, value = org_weight_human_from_file, step = 100.))
-
 
         #####################################################################################################
         ##### Do scaling based on selected scaling method and store results in results_scaling dictionary
@@ -2385,6 +2421,13 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
 
     AUC_calculated = 'not calculated'
 
+
+    # create the figure that will show x and y input (and add the fit later)
+    ik_rgb = 0 #ik*div
+    fig_fit_all = go.Figure()
+    colorscale_all = sample_colorscale('Rainbow', len(tissues), colortype='rgb')
+
+
     data_tissues=dict()      
     fitresults_all = dict()
     all_figures_fit= dict()
@@ -2419,6 +2462,15 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
                 mode='markers',
                 marker={'color': f'rgb({ik_rgb},{ik_rgb},{ik_rgb})'}
             ))
+
+            fig_fit_all.add_trace(go.Scatter(
+                x=x_raw,
+                y=y_raw,
+                name=tissue,
+                mode='markers',
+                marker={'color': colorscale_all[ik]}
+                ))
+
 
             # Create a header with anchor, so you can create a hyperlink later in the app if you have problems with the fit 
             st.header(f'{tissue}', anchor = str('anchor-fitdecay-')+str(tissue))
@@ -2573,6 +2625,7 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
                         col_fit_1.latex(       r''' T_{1/2} = ''' + f'{thalf:.2f}')
                         plot_fitresult = True
                         fig_fit.add_trace(go.Scatter(x=x_fit,y=y_fit,fill='tozeroy',mode='none')) #mode = 'markers+lines' or delete 
+                        # fig_fit_all.add_trace(go.Scatter(x=x_fit,y=y_fit,fill='tozeroy',mode='none',name=f'{tissue}-AUC')) #mode = 'markers+lines' or delete 
 
                         fitresults_tissue['A1'] = round(A1,4)
                         fitresults_tissue['lambda_fit'] = round(lambda_fit,4)
@@ -2600,6 +2653,7 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
                         col_fit_1.latex(       r''' T_{1/2} = ''' + f'{thalf:.2f}')
                         plot_fitresult = True
                         fig_fit.add_trace(go.Scatter(x=x_fit,y=y_fit,fill='tozeroy',mode='none')) #mode = 'markers+lines' or delete 
+                        # fig_fit_all.add_trace(go.Scatter(x=x_fit,y=y_fit,fill='tozeroy',mode='none',name=f'{tissue}-AUC')) #mode = 'markers+lines' or delete 
 
                         fitresults_tissue['A1'] = round(A1,4)
                         fitresults_tissue['lambda_fit'] = round(lambda_fit,4)
@@ -2629,6 +2683,7 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
                         col_fit_1.latex(       r''' \lambda_{eff,2} = ''' + f'{lambda2:.2f}')
                         plot_fitresult = True
                         fig_fit.add_trace(go.Scatter(x=x_fit,y=y_fit,fill='tozeroy',mode='none')) #mode = 'markers+lines' or delete 
+                        # fig_fit_all.add_trace(go.Scatter(x=x_fit,y=y_fit,fill='tozeroy',mode='none',name=f'{tissue}-AUC')) #mode = 'markers+lines' or delete 
                         
                         fitresults_tissue['A1'] = round(A1,4)
                         fitresults_tissue['lambda1'] = round(lambda1,4)
@@ -2640,6 +2695,7 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
                 y_fit_quality = y_raw
                 plot_fitresult = False
                 fig_fit.add_trace(go.Scatter(x=xtrap,y=ytrap,fill='tozeroy',mode='none')) #mode = 'markers+lines' or delete 
+                # fig_fit_all.add_trace(go.Scatter(x=xtrap,y=ytrap,fill='tozeroy',mode='none',name=f'{tissue}-AUC')) #mode = 'markers+lines' or delete 
                 fit_successful = True
                 AUC_extrapolated = 0.
 
@@ -2648,6 +2704,7 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
                 y_fit_quality = y_raw
                 plot_fitresult = False
                 fig_fit.add_trace(go.Scatter(x=xtrap,y=ytrap,fill='tozeroy',mode='none')) #mode = 'markers+lines' or delete 
+                # fig_fit_all.add_trace(go.Scatter(x=xtrap,y=ytrap,fill='tozeroy',mode='none',name=f'{tissue}-AUC')) #mode = 'markers+lines' or delete 
                 fit_successful = True
 
             elif fitmodel == linphysdecay:
@@ -2655,10 +2712,12 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
                 y_fit_quality = y_raw
                 plot_fitresult = False
                 fig_fit.add_trace(go.Scatter(x=xtrap,y=ytrap,fill='tozeroy',mode='none')) #mode = 'markers+lines' or delete 
+                # fig_fit_all.add_trace(go.Scatter(x=xtrap,y=ytrap,fill='tozeroy',mode='none',name=f'{tissue}-AUC')) #mode = 'markers+lines' or delete 
                 x_decay = np.linspace(list(x_raw)[-1],list(x_raw)[-1]*20,num=20)
                 x_decay_fit = x_decay - list(x_raw)[-1]
                 y_decay = list(y_raw)[-1] * np.exp(-x_decay_fit/(isotopes_BioD_halflives[radioisotope1]/np.log(2)))
                 fig_fit.add_trace(go.Scatter(x=x_decay,y=y_decay,fill='tozeroy',mode='none')) #mode = 'markers+lines' or delete 
+                # fig_fit_all.add_trace(go.Scatter(x=x_decay,y=y_decay,fill='tozeroy',mode='none',name=f'{tissue}-AUC')) #mode = 'markers+lines' or delete 
                 fit_successful = True
 
             elif fitmodel == biexpelim:
@@ -2685,6 +2744,7 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
 
                         plot_fitresult = True
                         fig_fit.add_trace(go.Scatter(x=x_fit,y=y_fit,fill='tozeroy',mode='none')) #mode = 'markers+lines' or delete 
+                        # fig_fit_all.add_trace(go.Scatter(x=x_fit,y=y_fit,fill='tozeroy',mode='none',name=f'{tissue}-AUC')) #mode = 'markers+lines' or delete 
                         
                         fitresults_tissue['ka'] = round(ka,4)
                         fitresults_tissue['ke'] = round(ke,4)
@@ -2714,6 +2774,7 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
 
                         plot_fitresult = True
                         fig_fit.add_trace(go.Scatter(x=x_fit,y=y_fit,fill='tozeroy',mode='none')) #mode = 'markers+lines' or delete 
+                        # fig_fit_all.add_trace(go.Scatter(x=x_fit,y=y_fit,fill='tozeroy',mode='none',name=f'{tissue}-AUC')) #mode = 'markers+lines' or delete 
                         
                         fitresults_tissue['lambda1'] = round(lambda1,4)
                         fitresults_tissue['lambda2'] = round(lambda2,4)
@@ -2744,6 +2805,7 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
 
                         plot_fitresult = True
                         fig_fit.add_trace(go.Scatter(x=x_fit,y=y_fit,fill='tozeroy',mode='none')) #mode = 'markers+lines' or delete 
+                        # fig_fit_all.add_trace(go.Scatter(x=x_fit,y=y_fit,fill='tozeroy',mode='none',name=f'{tissue}-AUC')) #mode = 'markers+lines' or delete 
                         
                         fitresults_tissue['lambda1'] = round(lambda1,4)
                         fitresults_tissue['lambda2'] = round(lambda2,4)
@@ -2806,6 +2868,15 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
                         line=go.scatter.Line(color="red"),
                         showlegend=False)
                         )
+                fig_fit_all.add_trace(
+                    go.Scatter(
+                        x=x_fit,
+                        y=y_fit,
+                        mode="lines",
+                        line=go.scatter.Line(color="red"),
+                        showlegend=True,
+                        name=f'{tissue}-fit')
+                        )
                 fig_fit.add_annotation(
                     xref="x domain",
                     yref="y domain",
@@ -2843,6 +2914,13 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
                 yaxis_title=f"[%ID/g]",
                 xaxis_title=f"{time_keyword} [{time_unit}]",
             )
+
+            fig_fit_all.update_layout(
+                yaxis_title=f"[%ID/g]",
+                xaxis_title=f"{time_keyword} [{time_unit}]",
+            )
+
+
             st.plotly_chart(fig_fit)
 
            
@@ -2876,6 +2954,7 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
 
             fit_submitted = st.form_submit_button(f'Re-run fit for {tissue}')
                 
+
         # Add a download button to download the figure (traces with fit result)
         if st.button(f'Download Chart {tissue}',key=f'{tissue}-dwnld'):
             # Convert the figure to an image
@@ -2890,6 +2969,20 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
 
             # Download the image with the new file name
             st.download_button(label='Download', data=image, file_name=new_file_name, mime='image/png')
+
+    yaxis_type_all = st.radio(
+            f"Plot [%ID/g] axis representation",
+            ('normal','logarithmic'),key=f'all_axiskey_'+str(ik))
+    if yaxis_type_all == 'logarithmic':
+        plotLog_all = True
+    else:
+        plotLog_all = False
+    if plotLog_all:
+        fig_fit_all.update_yaxes(type="log")
+
+    st.plotly_chart(fig_fit_all)
+
+
 
     fitresults = pd.DataFrame.from_dict(fitresults_all)
     if decay_corrected:

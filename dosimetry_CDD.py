@@ -174,11 +174,15 @@ def app(CDD_TOKEN='None'):
                         readouts_list.append(readout_nr[1]['readouts'])   
                     bioD_df = pd.DataFrame.from_dict(readouts_list)
 
+
                     # split readouts into value/note/outlier/outlier-type (CDD logic), exclude outliers from bioD_df
                     outlier_list = []
+                    parameters_experiment_BioD_default = []
+
                     with st.expander('Data uploaded to CDD Vault'):
                         for element in readout_definitions:
                             st.write('%10i: %s'%(element['id'], element['name']))
+                            parameters_experiment_BioD_default.append(element['name'])
                         for column_name in bioD_df:
                             if type(bioD_df.loc[:,column_name].values.tolist()[0]) == dict:
                                 bioD_df[[f'{column_name}-value', f'{column_name}-note', f'{column_name}-outlier', f'{column_name}-outlier_type']] = bioD_df[column_name].apply(lambda x: pd.Series(extract_values_dict(x),dtype='object'))
@@ -187,12 +191,13 @@ def app(CDD_TOKEN='None'):
                             bioD_df = bioD_df[bioD_df[column_name_outlier] != True] #only include rows where all outlier fields are marked as False (= no outlier)
                         st.write(bioD_df)
 
+                    # st.write(parameters_experiment_BioD_default) #only include readouts that have non-unique values in the CDD Vault
                     # pre-defined standard conditions in BioD protocols that can be individually selected by user to include in dosimetry calculations
-                    parameters_experiment_BioD = [  'Data Source',
-                                                    'Tumor Type',
-                                                    'Species',
-                                                    'Analysis Method',
-                                                    'Time point']
+                    parameters_experiment_BioD = st.multiselect("Select parameters to include in dosimetry calculations",
+                                                    options=parameters_experiment_BioD_default,
+                                                    default=['Species','Time point','sex'])
+                    
+
 
 
                     ###### Show a table where specific parameters can be selected
@@ -235,6 +240,10 @@ def app(CDD_TOKEN='None'):
                     else:
                         st.write(f'There are BioD data uploaded in CDD Vault for {molecule_batch_ID}')
                         tissues,results_for_dosimetry_Calc_df,results_filtered,condition = get_condition_raw_aver(tissues,timepoints,bioD_data_filtered,readout_definitions)
+                        try:
+                            sex_key = results_filtered['sex'][0]
+                        except:
+                            sex_key= 'male'
 
                         averaged_weight_all_timepoints_df = get_masses_CDD(results_filtered)
                         
@@ -319,7 +328,7 @@ def app(CDD_TOKEN='None'):
 
                         if st.session_state.calculate_bm:
                             bm_method,blood_key = select_bonemarrow_projection(fitresults)
-                            fitresults = project_bonemarrow(fitresults,blood_key,bm_method)
+                            fitresults = project_bonemarrow(fitresults,blood_key,bm_method,sex_key)
                         else:
                             blood_key = None
 
@@ -336,7 +345,7 @@ def app(CDD_TOKEN='None'):
                     
                         if st.session_state.calc_scaling:
                             st.write(f'You selected: {scaling_method}')
-                            results_scaling_df = scaling_mTIAC_hTIAC(scaling_method,fitresults,radioisotope1,x_fit=x_fit,data_tissues=data_tissues,cdd_weights=averaged_weight_all_timepoints_df,blood_key=blood_key)
+                            results_scaling_df = scaling_mTIAC_hTIAC(scaling_method,fitresults,radioisotope1,x_fit=x_fit,data_tissues=data_tissues,cdd_weights=averaged_weight_all_timepoints_df,blood_key=blood_key,sex_key=sex_key)
 
                             ############################################################################
                             ##### Next section: Dosimetry from human residence time
@@ -352,9 +361,12 @@ def app(CDD_TOKEN='None'):
                             st.write(f'You selected {radioisotope2}')
 
                             try:
-                                df_sfactors = pd.read_csv(f"ICRP89_DF_{radioisotope2}.csv")
+                                df_sfactors = pd.read_csv(f"ICRP89_DF_{radioisotope2}-{sex_key}.csv")
                             except:
-                                st.error(f'Dose factors for {radioisotope2} are not defined, please ask admin for future implementation or select different isotope for dosimetry')
+                                try:
+                                    df_sfactors = pd.read_csv(f"ICRP89_DF_{radioisotope2}.csv")
+                                except:
+                                    st.error(f'Dose factors for ICRP89_DF_{radioisotope2}-{sex_key}.csv are not defined, please ask admin for future implementation or select different isotope for dosimetry')
                             olinda_input_df, results_doselimits_df = dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,molecule_batch_ID,df_sfactors,radioisotope2,doselimits_file)
 
 

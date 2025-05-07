@@ -1,0 +1,46 @@
+Available tissues for human,Mass Male human model [g],Mass Female human model [g],Source
+adrenal glands,14,13,OLINDA ICRP89 male
+bladder wall,50,40,OLINDA ICRP89 male
+blood,5300,3900,OLINDA ICRP89 male
+bone,5500,4520,OLINDA ICRP89 male
+bone marrow,1170,900,OLINDA ICRP89 male
+bone residual,,,OLINDA ICRP89 male
+bottom half,,,OLINDA ICRP89 male
+brain,1450,1300,OLINDA ICRP89 male
+breast,25,500,OLINDA ICRP89 male
+carcass,30000,35000,
+cecum,,,OLINDA ICRP89 male
+eyes,15,15,OLINDA ICRP89 male
+esophagus,40,35,OLINDA ICRP89 male
+feces,150,120,OLINDA ICRP89 male
+femur,100,82,OLINDA ICRP89 male
+gallbladder,10,8,OLINDA ICRP89 male
+heart,330,250,OLINDA ICRP89 male
+kidney,310,275,OLINDA ICRP89 male
+large intestine,370,360,OLINDA ICRP89 male
+large intestine contents,300,247,OLINDA ICRP89 male
+liver,1800,1400,OLINDA ICRP89 male
+lung,1200,950,OLINDA ICRP89 male
+muscle,29000,17500,OLINDA ICRP89 male
+ovaries,,11,OLINDA ICRP89 male
+pancreas,140,120,OLINDA ICRP89 male
+prostate,17,,OLINDA ICRP89 male
+salivary glands,85,70,OLINDA ICRP89 male
+skeleton,10500,7800,OLINDA ICRP89 male
+skin,3300,2300,OLINDA ICRP89 male
+skull,660,542,OLINDA ICRP89 male
+small intestine,650,600,OLINDA ICRP89 male
+small intestine contents,350,288,OLINDA ICRP89 male
+spleen,150,130,OLINDA ICRP89 male
+stomach,150,140,OLINDA ICRP89 male
+stomach contents,250,205,OLINDA ICRP89 male
+tail,,,OLINDA ICRP89 male
+testes,35,,OLINDA ICRP89 male
+thymus,25,20,OLINDA ICRP89 male
+thyroid,20,17,OLINDA ICRP89 male
+top half,,,OLINDA ICRP89 male
+total body,73,60,OLINDA ICRP89 male
+tumor,310,310,Greg
+urine,1600,1315,OLINDA ICRP89 male
+uterus,,80,OLINDA ICRP89 male
+,,,
