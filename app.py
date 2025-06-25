@@ -12,11 +12,11 @@ import timepoints_BioD
 # dictionary of all available apps that can be accessed on the main streamlit page
 PAGES = {
     "dosimetry: from %ID/g": dosimetry_idg,
-    "dosimetry: from hTIAC(g)": dosimetry_hTIACg,
-    "dosimetry: from hTIAC(org)": dosimetry_hTIACorg,
+    # "dosimetry: from hTIAC(g)": dosimetry_hTIACg,
+    # "dosimetry: from hTIAC(org)": dosimetry_hTIACorg,
     "dosimetry: from CDD BioD": dosimetry_CDD,
     "dosimetry: from CDD Imaging": dosimetry_CDD_imaging,
-    "scaling: mTIAC -> hTIAC": scaling_mTIAC,
+    # "scaling: mTIAC -> hTIAC": scaling_mTIAC,
     # "GR":   gr_calculator,
     "Radioisotope decay": decay_calculator,    
     "Sampling Timepoints BioD": timepoints_BioD,    

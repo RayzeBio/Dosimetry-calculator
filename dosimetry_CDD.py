@@ -387,10 +387,14 @@ def app(CDD_TOKEN='None'):
     if st.button('Clear all calculations: Click button and reload homepage ( "Ctrl + R" or F5 )'):
         st.cache_data.clear()
         st.cache_resource.clear()
-        st.session_state = _get_state(st.session_state)
-        st.session_state.calc_scaling = False
-        st.session_state.decay_correction = False
-        st.session_state.searchBioD = False
+        try:
+            st.session_state = _get_state(st.session_state)
+
+            st.session_state.calc_scaling = False
+            st.session_state.decay_correction = False
+            st.session_state.searchBioD = False
+        except:
+            pass
         st.stop()
 
     

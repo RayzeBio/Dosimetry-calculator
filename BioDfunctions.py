@@ -1033,7 +1033,10 @@ def download_cdd_rawdata(rayz_id,radioisotope1,results_for_dosimetry_Calc_df,raw
         if 'Tissue' in results_filtered.columns:
             for tissue in tissues:
                 results_df = results_filtered[results_filtered['Tissue']==tissue]
-                results_df.to_excel(writer, sheet_name = tissue+'-input', index = True)
+                try:
+                    results_df.to_excel(writer, sheet_name = tissue+'-input', index = True)
+                except:
+                    st.error(f'Invalid characters in header --{tissue}-- for excel file export. Please change tissue name.')
 
 
     st.download_button(label='Download CDD rawdata',
@@ -2425,8 +2428,10 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
     # create the figure that will show x and y input (and add the fit later)
     ik_rgb = 0 #ik*div
     fig_fit_all = go.Figure()
-    colorscale_all = sample_colorscale('Rainbow', len(tissues), colortype='rgb')
-
+    if len(tissues) > 1:
+       colorscale_all = sample_colorscale('Rainbow', len(tissues), colortype='rgb')
+    else:
+        colorscale_all = ['rgb(0,0,0)']
 
     data_tissues=dict()      
     fitresults_all = dict()
@@ -2980,6 +2985,16 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
     if plotLog_all:
         fig_fit_all.update_yaxes(type="log")
 
+
+    ###########################################################################
+        # Decay FIT Plots
+    ###########################################################################
+    markdowntext = "[%s](#%s)"%(str('Plot Fit results'),str('anchor-fit-plot-results'))
+    st.sidebar.markdown(markdowntext, unsafe_allow_html=True)
+    st.header(f'Plot fit results', anchor=str('anchor-fit-plot-results'))
+              
+    st.success('You can deselect the tissues in the plot by clicking on the legend')
+
     st.plotly_chart(fig_fit_all)
 
 
@@ -3018,12 +3033,17 @@ def tiac_results_download(fitresults, data_input, rawdata=[], all_figures_fit=[]
             rawdata.to_excel(writer, sheet_name = "Data input", index = False)
         workbook  = writer.book
         for fig_nr,figure_fit in enumerate(all_figures_fit):
-            img_stream = pd.io.common.BytesIO(all_figures_fit[figure_fit])
-            img = workbook.add_worksheet(f'{figure_fit}-{fig_nr}')
-            img.insert_image('D2', 'image.png', {'image_data': img_stream})
-            img.set_column('A:A', 35)
-            img.set_column('B:B', 25)
-            fitresults[['parameter',figure_fit]].to_excel(writer, sheet_name = f'{figure_fit}-{fig_nr}', index = False)
+            try:
+                img_stream = pd.io.common.BytesIO(all_figures_fit[figure_fit])
+                img = workbook.add_worksheet(f'{figure_fit}-{fig_nr}')
+
+                img.insert_image('D2', 'image.png', {'image_data': img_stream})
+                img.set_column('A:A', 35)
+                img.set_column('B:B', 25)
+                fitresults[['parameter',figure_fit]].to_excel(writer, sheet_name = f'{figure_fit}-{fig_nr}', index = False)
+
+            except:
+                    st.error(f'Error creating worksheet for {figure_fit}. Sheet name too long or invalid.')  
 
         
     st.download_button(label='Download Fit Results',
@@ -3123,12 +3143,15 @@ def all_results_download(results_dosimetry_df,results_scaling_df,fitresults, dat
         # To return the fitresults and plot for each organ individually on a separate worksheet
         workbook  = writer.book
         for fig_nr,figure_fit in enumerate(all_figures_fit):
-            img_stream = pd.io.common.BytesIO(all_figures_fit[figure_fit])
-            img = workbook.add_worksheet(f'{figure_fit}-{fig_nr}')
-            img.insert_image('D2', 'image.png', {'image_data': img_stream})
-            img.set_column('A:A', 35)
-            img.set_column('B:B', 25)
-            fitresults[['parameter',figure_fit]].to_excel(writer, sheet_name = f'{figure_fit}-{fig_nr}', index = False)
+            try:
+                img_stream = pd.io.common.BytesIO(all_figures_fit[figure_fit])
+                img = workbook.add_worksheet(f'{figure_fit}-{fig_nr}')
+                img.insert_image('D2', 'image.png', {'image_data': img_stream})
+                img.set_column('A:A', 35)
+                img.set_column('B:B', 25)
+                fitresults[['parameter',figure_fit]].to_excel(writer, sheet_name = f'{figure_fit}-{fig_nr}', index = False)
+            except:
+                    st.error(f'Error creating worksheet for {figure_fit}. Sheet name too long or invalid.') 
 
 
     st.download_button(label='Download Results',
