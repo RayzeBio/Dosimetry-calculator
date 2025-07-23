@@ -378,7 +378,7 @@ def app(CDD_TOKEN='None'):
                                     options=(isotopes_BioD_halflives.keys()), index=list(isotopes_BioD_halflives.keys()).index(radioisotope1))                                
                             st.write(f'You selected {radioisotope2}')
 
-                            olinda_input_df, results_doselimits_df = dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,molecule_batch_ID,sex_key,df_sfactors,radioisotope2,doselimits_file)
+                            olinda_input_df, results_doselimits_df = dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,molecule_batch_ID,sex_key,radioisotope2,doselimits_file)
 
 
                             #############################################################################
