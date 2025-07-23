@@ -2,6 +2,11 @@
 IRDC (Inhouse Rayzebio Dosimetry Calculator)
 Written by Charlotte Lorenz, RayzeBio Inc. 
 
+Version 2.0: 2025-07-23
+updated:
+- Ac225 with all daughters in decay chain included for dose deposition
+- female and male phantoms integrated for scaling and dose deposition
+
 Version 0.7: 2023-01-16
 updated:
 - Scaling methods validated with Beykan et al. publication

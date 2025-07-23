@@ -244,6 +244,8 @@ def app(CDD_TOKEN='None'):
                             sex_key = results_filtered['sex'][0]
                         except:
                             sex_key= 'male'
+                        sex_key_list = ['male','female']
+                        sex_key= st.selectbox('Please select gender of human phantom (for scaling and absorbed dose calculation)',sex_key_list,index=sex_key_list.index(sex_key))
 
                         averaged_weight_all_timepoints_df = get_masses_CDD(results_filtered)
                         
@@ -360,14 +362,8 @@ def app(CDD_TOKEN='None'):
                                     options=(isotopes_BioD_halflives.keys()), index=list(isotopes_BioD_halflives.keys()).index(radioisotope1))                                
                             st.write(f'You selected {radioisotope2}')
 
-                            try:
-                                df_sfactors = pd.read_csv(f"ICRP89_DF_{radioisotope2}-{sex_key}.csv")
-                            except:
-                                try:
-                                    df_sfactors = pd.read_csv(f"ICRP89_DF_{radioisotope2}.csv")
-                                except:
-                                    st.error(f'Dose factors for ICRP89_DF_{radioisotope2}-{sex_key}.csv are not defined, please ask admin for future implementation or select different isotope for dosimetry')
-                            olinda_input_df, results_doselimits_df = dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,molecule_batch_ID,df_sfactors,radioisotope2,doselimits_file)
+
+                            olinda_input_df, results_doselimits_df = dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,molecule_batch_ID,sex_key,radioisotope2,doselimits_file)
 
 
                             #############################################################################

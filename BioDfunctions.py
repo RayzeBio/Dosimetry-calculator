@@ -25,7 +25,7 @@ from PIL import Image
 
 vault_id=5938
 tumor_spheres_file = pd.read_csv("spheres-310g-tumorDoses.csv")
-irdc_version = "IRDC v1.2"
+irdc_version = "IRDC v2.0"
 
 #############################################################
 # variable definitions used for dosimetry:
@@ -46,7 +46,9 @@ isotopes_BioD_halflives = {"Lu-177": 159.53,
                         "I-125": 1427.76,
                         "I-131": 192.47,
                         "Ga-68": 1.13,
-                        "Cu-64": 12.7}
+                        "Cu-64": 12.7,
+                        "Tb-149": 4.12,
+                        "Tb-161": 165.84}
 
 isotopes_human_halflives = {"Lu-177": 159.6,          #halflives in hours   
                         "Ac-225": 238.08,   
@@ -1668,7 +1670,17 @@ def rename_olinda_tissues(olinda_input,source_organ, source_dose):
         olinda_input[source_organ] = [source_dose, source_organ]
     return olinda_input
 
-def dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,molecule_batch_ID,df_sfactors,radioisotope2,doselimits_file):
+def dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,molecule_batch_ID,sex_key,radioisotope2,doselimits_file):
+
+    try:
+        df_sfactors = pd.read_csv(f"ICRP89_DF_{radioisotope2}-{sex_key}.csv")
+    except:
+        try:
+            df_sfactors = pd.read_csv(f"ICRP89_DF_{radioisotope2}.csv")
+        except:
+            st.error(f'Dose factors for ICRP89_DF_{radioisotope2}-{sex_key}.csv are not defined, please ask admin for future implementation or select different isotope for dosimetry')
+
+    st.write(df_sfactors)
     st.latex(r'''  absorbed Dose = hTIAC_g * m_{organ} * dosefactor_{organ,nucl} (T <- S)''')
     st.latex(r'''  MTA (MBq) = DoseLimit_{organ} (Gy) / dose_{organ} (Gy/MBq)''')
 
@@ -1755,15 +1767,51 @@ def dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,
             )
 
     doselimit_expander = st.expander(f'Change dose limits to organ')
+    # if fnmatch(radioisotope2, 'Ac-225'):
+    #     st.success('Ac-225 is selected, calculating dose for Ac-225 and daughters')
     results_dosimetry_alltissues = list()
     for ik, tissue_target in enumerate(targets_fromCSV_list):
-        try:
-            saf_vector= df_sfactors[tissue_target].iloc[0:25]
-            dosimetry_input_df[tissue_target] = np.array(list(saf_vector), dtype=float)
-        except:
-            saf_vector= df_sfactors[tissue_target].iloc[0:26]
-            dosimetry_input_df[tissue_target] = np.array(list(saf_vector), dtype=float)            
-        dosimetry_input_df[tissue_target+' Dose'] = dosimetry_input_df[tissue_target] * dosimetry_input_df['# of Disintegrations (MBq-hr/MBq)'] * 60 * 60
+        if fnmatch(radioisotope2, 'Ac-225'):
+            st.error('Ac-225 is selected, calculating dose for Ac-225 but daughters not implemented yet')
+            try:
+                saf_vector= df_sfactors[tissue_target].iloc[0:25]
+                dosimetry_input_df[tissue_target] = np.array(list(saf_vector), dtype=float)
+            except:
+                saf_vector= df_sfactors[tissue_target].iloc[0:26]
+                dosimetry_input_df[tissue_target] = np.array(list(saf_vector), dtype=float)            
+            dosimetry_input_df[tissue_target+' Dose'] = dosimetry_input_df[tissue_target] * dosimetry_input_df['# of Disintegrations (MBq-hr/MBq)'] * 60 * 60
+
+            # # Ac-225 and daughters with fractional contributions in decay chain
+            # Ac225_daughters = dict({'Ac-225':1,
+            #                        'Fr-221':1,
+            #                        'At-217':1,
+            #                        'Bi-213':1,
+            #                        'Po-213':0.978,
+            #                        'Tl-209':0.022,
+            #                        'Pb-209':1})
+            # for daughter, fraction in Ac225_daughters.items():           
+            #     df_sfactors = pd.read_csv(f"ICRP89_DF_{daughter}-{sex_key}.csv")
+ 
+            #     try:
+            #         saf_vector= df_sfactors[tissue_target].iloc[0:25]
+            #         dosimetry_input_df[tissue_target] = np.array(list(saf_vector), dtype=float)
+            #     except:
+            #         saf_vector= df_sfactors[tissue_target].iloc[0:26]
+            #         dosimetry_input_df[tissue_target] = np.array(list(saf_vector), dtype=float)   
+
+            #     if tissue_target+' Dose' not in dosimetry_input_df.columns:             
+            #         dosimetry_input_df[tissue_target+' Dose'] = dosimetry_input_df[tissue_target] * dosimetry_input_df['# of Disintegrations (MBq-hr/MBq)'] * 60 * 60
+            #     else:
+            #         dosimetry_input_df[tissue_target+' Dose'] += fraction * (dosimetry_input_df[tissue_target] * dosimetry_input_df['# of Disintegrations (MBq-hr/MBq)'] * 60 * 60)
+
+        else:
+            try:
+                saf_vector= df_sfactors[tissue_target].iloc[0:25]
+                dosimetry_input_df[tissue_target] = np.array(list(saf_vector), dtype=float)
+            except:
+                saf_vector= df_sfactors[tissue_target].iloc[0:26]
+                dosimetry_input_df[tissue_target] = np.array(list(saf_vector), dtype=float)            
+            dosimetry_input_df[tissue_target+' Dose'] = dosimetry_input_df[tissue_target] * dosimetry_input_df['# of Disintegrations (MBq-hr/MBq)'] * 60 * 60
 
         try:
             hTIAC_org_input = dosimetry_input_df['# of Disintegrations (MBq-hr/MBq)'][ik]

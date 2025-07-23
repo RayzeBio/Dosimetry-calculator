@@ -215,6 +215,11 @@ def app(CDD_TOKEN='None'):
                         st.write(f'There are BioD data uploaded in CDD Vault for {molecule_batch_ID}')
                         tissues,results_for_dosimetry_Calc_df,results_filtered_df,condition = get_condition_raw_aver(tissues,timepoints,bioD_data_filtered,readout_definitions)
 
+                        try:
+                            sex_key = results_filtered_df['sex'][0]
+                        except:
+                            sex_key= 'male'
+
                         averaged_weight_all_timepoints_df = get_masses_CDD(results_filtered_df, cdd_weight_key='VOI volume')
 
                         with st.expander(f'{condition} filtered and averaged'):
@@ -373,11 +378,7 @@ def app(CDD_TOKEN='None'):
                                     options=(isotopes_BioD_halflives.keys()), index=list(isotopes_BioD_halflives.keys()).index(radioisotope1))                                
                             st.write(f'You selected {radioisotope2}')
 
-                            try:
-                                df_sfactors = pd.read_csv(f"ICRP89_DF_{radioisotope2}.csv")
-                            except:
-                                st.error(f'Dose factors for {radioisotope2} are not defined, please ask admin for future implementation or select different isotope for dosimetry')
-                            olinda_input_df, results_doselimits_df = dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,molecule_batch_ID,df_sfactors,radioisotope2,doselimits_file)
+                            olinda_input_df, results_doselimits_df = dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,molecule_batch_ID,sex_key,df_sfactors,radioisotope2,doselimits_file)
 
 
                             #############################################################################

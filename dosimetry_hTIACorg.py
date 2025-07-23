@@ -60,6 +60,9 @@ def app(CDD_TOKEN='None'):
     ########################################################################################################################################################
             
     if st.session_state.tiac_calculated:   
+        sex_key= st.selectbox('Please select phantom gender',['male','female'])
+
+
         # Allow user to change body weight and organ weight for mouse and human  
         results_scaling_alltissues = dict()
         col_calc_1,col_calc_2 = st.columns(2)
@@ -121,12 +124,8 @@ def app(CDD_TOKEN='None'):
                 options=(isotopes_BioD_halflives.keys()), index=0)                                
             st.write(f'You selected {radioisotope2}')
             
-            try:
-                df_sfactors = pd.read_csv(f"ICRP89_DF_{radioisotope2}.csv")
-            except:
-                st.error(f'Dose factors for {radioisotope2} are not defined, please ask admin for future implementation or select different isotope for dosimetry')
 
-            olinda_input_df, results_doselimits_df = dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,molecule_batch_ID,df_sfactors,radioisotope2,doselimits_file)
+            olinda_input_df, results_doselimits_df = dosimetry_from_hTIAC_org(rayz_id, batch_registration_id, results_scaling_df,molecule_batch_ID,sex_key,radioisotope2,doselimits_file)
 
 
             #############################################################################
