@@ -2464,7 +2464,7 @@ def fit_quality_calc(y_raw,y_fit_quality):
     return [mse_f,mae_f,rmse_f,r2_f]
 
 def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisotope1,decay_corrected):
-    same_fitmodel_all = st.checkbox('Same fitmodel for all tissues?',value=False, key='same_fitmodel_checkbox')
+    same_fitmodel_all = st.checkbox('Same fitmodel for all tissues?',value=True, key='same_fitmodel_checkbox')
     if same_fitmodel_all:
         fitmodel_presubmit = st.selectbox('Which fitmodel for all?',options= fitmodel_options)
     else:
