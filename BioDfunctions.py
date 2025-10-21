@@ -813,7 +813,7 @@ def get_BioD_output(readout_name,readout_definitions,data):
     # st.write(data_filtered)
     return data_filtered
 
-@st.cache_data
+# @st.cache_data
 def filter_BioD_conditions(bioD_data,selected_conditions_all,readout_definitions):
     bioD_data_filtered = bioD_data
     for element in selected_conditions_all.keys():
@@ -1087,7 +1087,7 @@ def plot_input_data_biod(results_for_dosimetry_Calc_df,condition,rayz_id):
     st.plotly_chart(fig, use_container_width=True)
 
 
-@st.cache_resource
+# @st.cache_resource
 def convert_df_to_csv(df):
    return df.to_csv().encode('utf-8')
 
