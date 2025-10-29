@@ -168,11 +168,14 @@ def app(CDD_TOKEN='None'):
                         st.session_state.tissues_updated = False
                         st.session_state.searchBioD = False
                 else:    
-                    # create a dataframe from all readouts uploaded                
+                    # create a dataframe from all readouts uploaded    
+                    readouts_ids_list = [str(d['id']) for d in readout_definitions if 'id' in d]            
                     readouts_list = []
                     for readout_nr in enumerate(bioD_data):
-                        readouts_list.append(readout_nr[1]['readouts'])   
-                    bioD_df = pd.DataFrame.from_dict(readouts_list)
+                        uploaded_condition = readout_nr[1]['readouts']
+                        readouts_list.append(uploaded_condition)   
+
+                    bioD_df = pd.DataFrame.from_records(readouts_list,columns=readouts_ids_list)
 
 
                     # split readouts into value/note/outlier/outlier-type (CDD logic), exclude outliers from bioD_df
@@ -184,7 +187,8 @@ def app(CDD_TOKEN='None'):
                             st.write('%10i: %s'%(element['id'], element['name']))
                             parameters_experiment_BioD_default.append(element['name'])
                         for column_name in bioD_df:
-                            if type(bioD_df.loc[:,column_name].values.tolist()[0]) == dict:
+                            if bioD_df[column_name].dtype == dict:
+                            # if type(bioD_df.loc[:,column_name].values.tolist()[0]) == dict:
                                 bioD_df[[f'{column_name}-value', f'{column_name}-note', f'{column_name}-outlier', f'{column_name}-outlier_type']] = bioD_df[column_name].apply(lambda x: pd.Series(extract_values_dict(x),dtype='object'))
                                 outlier_list.append(f'{column_name}-outlier')                            
                         for column_name_outlier in outlier_list:

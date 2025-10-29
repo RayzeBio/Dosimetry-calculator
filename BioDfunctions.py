@@ -809,8 +809,6 @@ def get_BioD_output(readout_name,readout_definitions,data):
         except:
             pass
     data_filtered = list(data[f'{readout_id}-value'])
-    # st.write(data)
-    # st.write(data_filtered)
     return data_filtered
 
 # @st.cache_data
@@ -839,7 +837,10 @@ def get_condition_raw_aver(tissues,timepoints,bioD_data_filtered,readout_definit
             condition_uploaded_id = uploaded_condition
             readout_definitions_df = pd.DataFrame.from_dict(readout_definitions)
             readout_name = list(readout_definitions_df[readout_definitions_df['id'] == int(condition_uploaded_id)]['name'])[0]
-            if readout_name in ['Inj dose per gram',"%ID/g",'tumor volume','body weight','Sample mass',"%ID/cc","kBq/cc",'VOI volume','Tissue','Time point','Subject','Injected activity','sex']:
+            standard_readouts = ['Inj dose per gram',"%ID/g",'tumor volume','body weight','Sample mass',"%ID/cc","kBq/cc",'VOI volume','Tissue','Time point','Subject','Injected activity','sex']
+            if bioD_data_filtered['898167'].isnull().all():
+                standard_readouts.remove('tumor volume')
+            if readout_name in standard_readouts:
                 preselect_condition = True
             else: 
                 preselect_condition = False
@@ -858,7 +859,11 @@ def get_condition_raw_aver(tissues,timepoints,bioD_data_filtered,readout_definit
     readouts_cols_df_n = readouts_expander.columns(len(keywordlist))
     for k_nr, keyword_selected in enumerate(keywordlist):
         keyword_id = str(get_readout_name_id(keyword_selected, readout_definitions=readout_definitions))
-        selected_column = bioD_data_filtered[f'{keyword_id}-value']
+        try:    
+            selected_column = bioD_data_filtered[f'{keyword_id}-value']
+        except:
+            st.error(f'error with {keyword_id}: {keyword_selected}')
+            st.write(bioD_data_filtered)
         results_dict[keyword_selected] = selected_column
         readouts_cols[k_nr].write(f'{keyword_selected}: ')
         readouts_cols_df[k_nr].write(selected_column.unique())
