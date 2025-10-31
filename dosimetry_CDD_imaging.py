@@ -219,6 +219,8 @@ def app(CDD_TOKEN='None'):
                             sex_key = results_filtered_df['sex'][0]
                         except:
                             sex_key= 'male'
+                        sex_key_list = ['male','female']
+                        sex_key= st.selectbox('Please select gender of human phantom (for scaling and absorbed dose calculation)',sex_key_list,index=sex_key_list.index(sex_key))
 
                         averaged_weight_all_timepoints_df = get_masses_CDD(results_filtered_df, cdd_weight_key='VOI volume')
 
@@ -344,7 +346,7 @@ def app(CDD_TOKEN='None'):
                         if st.session_state.calculate_bm:
                             bm_method,blood_key = select_bonemarrow_projection(fitresults)
                             if len(blood_key) > 0:
-                                fitresults = project_bonemarrow(fitresults,blood_key,bm_method)
+                                fitresults = project_bonemarrow(fitresults,blood_key,bm_method,sex_key)
                             else:
                                 st.error('Please select surrogate for blood')
                         else:
@@ -363,7 +365,7 @@ def app(CDD_TOKEN='None'):
                     
                         if st.session_state.calc_scaling:
                             st.write(f'You selected: {scaling_method}')
-                            results_scaling_df = scaling_mTIAC_hTIAC(scaling_method,fitresults,radioisotope1,x_fit=x_fit,data_tissues=data_tissues,cdd_weights=averaged_weight_all_timepoints_df,blood_key=blood_key)
+                            results_scaling_df = scaling_mTIAC_hTIAC(scaling_method,fitresults,radioisotope1,x_fit=x_fit,data_tissues=data_tissues,cdd_weights=averaged_weight_all_timepoints_df,blood_key=blood_key,sex_key=sex_key)
 
                             ############################################################################
                             ##### Next section: Dosimetry from human residence time

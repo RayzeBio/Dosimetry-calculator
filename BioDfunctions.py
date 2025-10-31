@@ -838,8 +838,11 @@ def get_condition_raw_aver(tissues,timepoints,bioD_data_filtered,readout_definit
             readout_definitions_df = pd.DataFrame.from_dict(readout_definitions)
             readout_name = list(readout_definitions_df[readout_definitions_df['id'] == int(condition_uploaded_id)]['name'])[0]
             standard_readouts = ['Inj dose per gram',"%ID/g",'tumor volume','body weight','Sample mass',"%ID/cc","kBq/cc",'VOI volume','Tissue','Time point','Subject','Injected activity','sex']
-            if bioD_data_filtered['898167'].isnull().all():
-                standard_readouts.remove('tumor volume')
+            try:
+                if bioD_data_filtered['898167'].isnull().all():
+                    standard_readouts.remove('tumor volume')
+            except:
+                    standard_readouts.remove('tumor volume')
             if readout_name in standard_readouts:
                 preselect_condition = True
             else: 
