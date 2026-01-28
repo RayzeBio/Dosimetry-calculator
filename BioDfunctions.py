@@ -496,17 +496,17 @@ def find_molecule_batch_id(molecule_id,token,bigDataSet=True):
     else:
         base_url = f"https://app.collaborativedrug.com/api/v1/vaults/{vault_id}/"
         headers = {'X-CDD-token':f'{token}'}
-        url = base_url + f"batches"
+        url = base_url + f"batches/query"
         parameters_search = {'molecule_batch_identifier': molecule_id}
-        response = requests.request("GET", url, headers=headers, params=parameters_search).json()
+        response = requests.post(url, headers=headers, params=parameters_search).json()
         return response
 
 def find_molecule_batch_id_bigDataset(molecule_id,token):
     base_url = f"https://app.collaborativedrug.com/api/v1/vaults/{vault_id}/"
     headers = {'X-CDD-token':f'{token}'}
-    url = base_url + f"batches"
+    url = base_url + f"batches/query"
     parameters_search = {'molecule_batch_identifier': molecule_id, 'async': True}
-    response = requests.request("GET", url, headers=headers, params=parameters_search).json()
+    response = requests.post(url, headers=headers, params=parameters_search).json()
     try:
         return response["id"]
     except:
@@ -534,8 +534,8 @@ def get_molecule_batch_id_bigDataset(molecule_id, token):
 def get_single_molecule(molecule_id,token):
     base_url = f"https://app.collaborativedrug.com/api/v1/vaults/{vault_id}/"
     headers = {'X-CDD-token':f'{token}'}
-    url = base_url + f"molecules/{molecule_id}"
-    response = requests.request("GET", url, headers=headers).json()
+    url = base_url + f"molecules/{molecule_id}/query"
+    response = requests.post(url, headers=headers).json()
     return response
 
 def get_molecule_batch_name(molecule_id,batch_id,token):
@@ -551,17 +551,17 @@ def get_molecule_batch_name(molecule_id,batch_id,token):
 def check_export_status(export_id, token):
     base_url = f"https://app.collaborativedrug.com/api/v1/vaults/{vault_id}/"
     headers = {'X-CDD-token':f'{token}'}
-    url = base_url + f"export_progress/{export_id}"
+    url = base_url + f"export_progress/{export_id}/query"
 
-    response = requests.request("GET", url, headers=headers).json()
+    response = requests.post(url, headers=headers).json()
     return response["status"]
 
 def get_BioD_data_bigDataset(molecule_id,batch_id,token,BioD_id = 57565):
     base_url = f"https://app.collaborativedrug.com/api/v1/vaults/{vault_id}/"
     headers = {'X-CDD-token':f'{token}'}
-    url = base_url + f"protocols/{BioD_id}/data"
+    url = base_url + f"protocols/{BioD_id}/data/query"
     parameters_bioD_request = {'molecules':molecule_id, 'async': True, 'page_size': 1000}
-    bioD_request = requests.request("GET", url, headers=headers, params=parameters_bioD_request).json()
+    bioD_request = requests.post(url, headers=headers, params=parameters_bioD_request).json()
     return bioD_request["id"]
 
 def get_molecules_from_BioD_bigDataset(molecule_id,batch_id, token, BioD_id = 57565):
@@ -584,17 +584,17 @@ def get_molecules_from_BioD_bigDataset(molecule_id,batch_id, token, BioD_id = 57
 def get_export(export_id, token):
     base_url = f"https://app.collaborativedrug.com/api/v1/vaults/{vault_id}/"
     headers = {'X-CDD-token':f'{token}'}
-    url = base_url + f"exports/{export_id}"
+    url = base_url + f"exports/{export_id}/query"
 
-    response = requests.request("GET", url, headers=headers)
+    response = requests.post(url, headers=headers)
     return response.json()
 
 def protocol_molecules_query(protocol_id, token):
     base_url = f"https://app.collaborativedrug.com/api/v1/vaults/{vault_id}/"
     headers = {'X-CDD-token':f'{token}'}
-    url = base_url + f"protocols/{protocol_id}/data"
+    url = base_url + f"protocols/{protocol_id}/data/query"
     parameters_bioD_request = {'async': True, 'page_size': 1000}
-    protocol_request = requests.request("GET", url, headers=headers, params=parameters_bioD_request).json()
+    protocol_request = requests.post(url, headers=headers, params=parameters_bioD_request).json()
     return protocol_request["id"]
 
 def get_molecules_from_protocol(protocol_id, token):
@@ -659,9 +659,9 @@ def get_uploaded_BioD(token):
     base_url = f"https://app.collaborativedrug.com/api/v1/vaults/{vault_id}/"
     headers = {'X-CDD-token':f'{token}'}
     BioD_id = 57565
-    url = base_url + f"protocols/{BioD_id}/data"
+    url = base_url + f"protocols/{BioD_id}/data/query"
     parameters_bioD_request = {'async': False, 'page_size': 1000}
-    bioD_request = requests.request("GET", url, headers=headers, params=parameters_bioD_request).json()
+    bioD_request = requests.post(url, headers=headers, params=parameters_bioD_request).json()
 
     BioD_results_molecule_batch_ids = list()
     batch_id_list = list()
@@ -697,17 +697,17 @@ def get_uploaded_BioD(token):
 def get_batch_information(batch_id,token):
     base_url = f"https://app.collaborativedrug.com/api/v1/vaults/{vault_id}/"
     headers = {'X-CDD-token':f'{token}'}
-    url = base_url + f"batches/{batch_id}"
+    url = base_url + f"batches/{batch_id}/query"
     parameters_request = {'async': False, 'page_size': 1000}
-    request = requests.request("GET", url, headers=headers).json()
+    request = requests.post(url, headers=headers).json()
     return request['molecule']
 
 def batches_from_rayzID(rayz_id,token):
     base_url = f"https://app.collaborativedrug.com/api/v1/vaults/{vault_id}/"
     headers = {'X-CDD-token':f'{token}'}
-    url = base_url + f"molecules"
+    url = base_url + f"molecules/query"
     parameters_request = {'names': rayz_id}
-    request = requests.request("GET", url, headers=headers, params=parameters_request).json()
+    request = requests.post(url, headers=headers, params=parameters_request).json()
     batches_from_rayzID = dict()
     batchnames_list = []
     batchIDs_list = []
@@ -728,9 +728,9 @@ def check_for_BioD_data(molecule_id,token):
     base_url = f"https://app.collaborativedrug.com/api/v1/vaults/{vault_id}/"
     headers = {'X-CDD-token':f'{token}'}
     BioD_id = 57565
-    url = base_url + f"protocols/{BioD_id}/data"
+    url = base_url + f"protocols/{BioD_id}/data/query"
     parameters_bioD_request = {'async': False, 'page_size': 1000}
-    bioD_request = requests.request("GET", url, headers=headers, params=parameters_bioD_request).json()
+    bioD_request = requests.post(url, headers=headers, params=parameters_bioD_request).json()
 
     BioD_molecules_list = []
     for object in bioD_request['objects']:
@@ -746,9 +746,9 @@ def get_BioD_data(molecule_id,batch_id,token):
     base_url = f"https://app.collaborativedrug.com/api/v1/vaults/{vault_id}/"
     headers = {'X-CDD-token':f'{token}'}
     BioD_id = 57565
-    url = base_url + f"protocols/{BioD_id}/data"
+    url = base_url + f"protocols/{BioD_id}/data/query"
     parameters_bioD_request = {'molecules':molecule_id, 'async': False, 'page_size': 1000}
-    bioD_request = requests.request("GET", url, headers=headers, params=parameters_bioD_request).json()
+    bioD_request = requests.post(url, headers=headers, params=parameters_bioD_request).json()
 
     bioD_request_objects = bioD_request['objects']
     identified_bioD = list(filter(lambda item: item['molecule'] == molecule_id and item['batch'] == batch_id, bioD_request_objects))
@@ -786,8 +786,8 @@ def imaging_protocol_request(token):
     base_url = f"https://app.collaborativedrug.com/api/v1/vaults/{vault_id}/"
     headers = {'X-CDD-token':f'{token}'}
     BioD_id = 84205
-    url = base_url + f"protocols/{BioD_id}"
-    bioD_request = requests.request("GET", url, headers=headers).json()
+    url = base_url + f"protocols/{BioD_id}/query"
+    bioD_request = requests.post(url, headers=headers).json()
     return bioD_request
 
 @st.cache_data
@@ -795,8 +795,8 @@ def BioD_protocol_request(token):
     base_url = f"https://app.collaborativedrug.com/api/v1/vaults/{vault_id}/"
     headers = {'X-CDD-token':f'{token}'}
     BioD_id = 57565
-    url = base_url + f"protocols/{BioD_id}"
-    bioD_request = requests.request("GET", url, headers=headers).json()
+    url = base_url + f"protocols/{BioD_id}/query"
+    bioD_request = requests.post(url, headers=headers).json()
     return bioD_request
 
 def get_BioD_output(readout_name,readout_definitions,data):
