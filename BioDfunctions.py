@@ -2988,10 +2988,7 @@ def fit_decay_fitmodel(data_input,tissues,time_keyword,injdose_keyword,radioisot
 
            
             #Store the png bytes object in a dict
-            try:
-                all_figures_fit[tissue] = fig_fit.to_image(format='png')
-            except:
-                pass
+            all_figures_fit[tissue] = fig_fit
 
             with col_fit_3:
                 try:
@@ -3092,7 +3089,9 @@ def tiac_results_download(fitresults, data_input, rawdata=[], all_figures_fit=[]
         workbook  = writer.book
         for fig_nr,figure_fit in enumerate(all_figures_fit):
             try:
-                img_stream = pd.io.common.BytesIO(all_figures_fit[figure_fit])
+                fig_obj = all_figures_fit[figure_fit]
+                img_bytes = fig_obj.to_image(format='png') if hasattr(fig_obj, 'to_image') else fig_obj
+                img_stream = pd.io.common.BytesIO(img_bytes)
                 img = workbook.add_worksheet(f'{figure_fit}-{fig_nr}')
 
                 img.insert_image('D2', 'image.png', {'image_data': img_stream})
@@ -3202,7 +3201,9 @@ def all_results_download(results_dosimetry_df,results_scaling_df,fitresults, dat
         workbook  = writer.book
         for fig_nr,figure_fit in enumerate(all_figures_fit):
             try:
-                img_stream = pd.io.common.BytesIO(all_figures_fit[figure_fit])
+                fig_obj = all_figures_fit[figure_fit]
+                img_bytes = fig_obj.to_image(format='png') if hasattr(fig_obj, 'to_image') else fig_obj
+                img_stream = pd.io.common.BytesIO(img_bytes)
                 img = workbook.add_worksheet(f'{figure_fit}-{fig_nr}')
                 img.insert_image('D2', 'image.png', {'image_data': img_stream})
                 img.set_column('A:A', 35)
