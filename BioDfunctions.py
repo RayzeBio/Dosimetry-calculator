@@ -1092,7 +1092,7 @@ def plot_input_data_biod(results_for_dosimetry_Calc_df,condition,rayz_id):
             title=f'{condition} for {rayz_id} from BioD',
             yaxis_title=f'{condition}',
         )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width=True)
 
 
 # @st.cache_resource
