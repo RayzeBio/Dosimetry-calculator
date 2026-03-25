@@ -1092,7 +1092,7 @@ def plot_input_data_biod(results_for_dosimetry_Calc_df,condition,rayz_id):
             title=f'{condition} for {rayz_id} from BioD',
             yaxis_title=f'{condition}',
         )
-    st.plotly_chart(fig, width=True)
+    st.plotly_chart(fig, use_container_width=True)
 
 
 # @st.cache_resource
@@ -1122,32 +1122,34 @@ def monofit_func(x,y,x_fit):
     return [A1, lambda_fit, thalf, y_fit, AUC_calculated,AUC_numerical_extrapolated]
 
 def monofit_dec_func(x,y,x_fit) :
-    popt, pcov = curve_fit(monoexpdecay, x, y, p0 = (1.,1.))
+    popt, pcov = curve_fit(monoexpdecay, x, y, p0 = (1.,1.), maxfev=5000)
     A1,lambda_fit      = popt
+    if lambda_fit <= 0:
+        raise ValueError('Non-decaying fit: lambda <= 0')
     thalf = np.log(2)/lambda_fit
     AUC_calculated = (A1/lambda_fit)    # from book M.Stabin: Basic Principles of Internal Dosimetry Calculations, page 7
-    AUC_numerical, AUC_err = quad(monoexpdecay,0,np.inf,args=(A1,lambda_fit))
+    AUC_numerical, AUC_err = quad(monoexpdecay,0,np.inf,args=(A1,lambda_fit), limit=100)
     last_timepoint = float(list(x)[-1])
-    AUC_numerical_extrapolated, AUC_err = quad(monoexpdecay,last_timepoint,np.inf,args=(A1,lambda_fit))
+    AUC_numerical_extrapolated, AUC_err = quad(monoexpdecay,last_timepoint,np.inf,args=(A1,lambda_fit), limit=100)
     y_fit = A1 * np.exp(- lambda_fit * x_fit) 
     return [A1, lambda_fit, thalf, y_fit, AUC_calculated,AUC_numerical_extrapolated]
 
 def biexp_func(x,y,x_fit):
-    popt, pcov = curve_fit(biexpdecay, x, y, p0 = (1.,1.,1.,1.), bounds=(0,np.inf))
+    popt, pcov = curve_fit(biexpdecay, x, y, p0 = (1.,1.,1.,1.), bounds=(0,np.inf), maxfev=5000)
     A1,lambda1,A2,lambda2 = popt
     last_timepoint = float(list(x)[-1])
     if lambda1 < 1e-4:
         AUC_calculated = (A2/lambda2)
-        AUC_numerical, AUC_err = quad(monoexpdecay,0,np.inf,args=(A2,lambda2))
-        AUC_numerical_extrapolated, AUC_err = quad(monoexpdecay,last_timepoint,np.inf,args=(A2,lambda2))
+        AUC_numerical, AUC_err = quad(monoexpdecay,0,np.inf,args=(A2,lambda2), limit=100)
+        AUC_numerical_extrapolated, AUC_err = quad(monoexpdecay,last_timepoint,np.inf,args=(A2,lambda2), limit=100)
     elif lambda2 < 1e-4:
         AUC_calculated = (A1/lambda1)
-        AUC_numerical, AUC_err = quad(monoexpdecay,0,np.inf,args=(A1,lambda1))
-        AUC_numerical_extrapolated, AUC_err = quad(monoexpdecay,last_timepoint,np.inf,args=(A1,lambda1))
+        AUC_numerical, AUC_err = quad(monoexpdecay,0,np.inf,args=(A1,lambda1), limit=100)
+        AUC_numerical_extrapolated, AUC_err = quad(monoexpdecay,last_timepoint,np.inf,args=(A1,lambda1), limit=100)
     else:
         AUC_calculated = (A1/lambda1) + (A2/lambda2)
-        AUC_numerical, AUC_err = quad(biexpdecay,0,np.inf,args=(A1,lambda1, A2, lambda2))
-        AUC_numerical_extrapolated, AUC_err = quad(biexpdecay,last_timepoint,np.inf,args=(A1,lambda1, A2, lambda2))
+        AUC_numerical, AUC_err = quad(biexpdecay,0,np.inf,args=(A1,lambda1, A2, lambda2), limit=100)
+        AUC_numerical_extrapolated, AUC_err = quad(biexpdecay,last_timepoint,np.inf,args=(A1,lambda1, A2, lambda2), limit=100)
     # st.write(AUC_calculated)
     # st.write(AUC_numerical)
 
@@ -1250,12 +1252,12 @@ def trap_physdecayextrapol_func(x_raw,y_raw, halflive):
     return [xtrap, ytrap, AUC_calculated,AUC_extrapolated]
 
 def biexpelim_func(x_raw,y_raw,x_fit): # from David Huang, reference needed
-    popt, pcov = curve_fit(biexp_abs_elim, x_raw, y_raw, p0=(0.01, 0.1, 0.001))
+    popt, pcov = curve_fit(biexp_abs_elim, x_raw, y_raw, p0=(0.01, 0.1, 0.001), maxfev=5000)
     ka,ke,cl = popt
     y_fit = biexp_abs_elim(x_fit,ka,ke,cl)
     AUC_calculated = (1/ke-1/ka)*(ke*ka)/(cl*(ka-ke))
     last_timepoint = float(list(x_raw)[-1])
-    AUC_numerical_extrapolated, AUC_err = quad(biexp_abs_elim,last_timepoint,np.inf,args=(ka,ke,cl))
+    AUC_numerical_extrapolated, AUC_err = quad(biexp_abs_elim,last_timepoint,np.inf,args=(ka,ke,cl), limit=100)
     return [ka, ke, cl, y_fit, AUC_calculated,AUC_numerical_extrapolated]
 
 def biexp_abs_elim2(x, lambda1, lambda2, A1):
@@ -1265,21 +1267,21 @@ def biexp_abs_elim3(x, lambda1, lambda2, A1, A2):
     return (A1*(np.exp(-lambda1*x))-(A2*np.exp(-lambda2*x)))
 
 def biexpelim_func2(x_raw,y_raw,x_fit): # from Voximetry
-    popt, pcov = curve_fit(biexp_abs_elim2, x_raw, y_raw, p0=(0.01, 0.1, 0.001))
+    popt, pcov = curve_fit(biexp_abs_elim2, x_raw, y_raw, p0=(0.01, 0.1, 0.001), maxfev=5000)
     lambda1, lambda2, A1 = popt
     y_fit = biexp_abs_elim2(x_fit,lambda1, lambda2, A1)
     AUC_calculated = A1*((1/lambda1) - (1/lambda2))
     last_timepoint = float(list(x_raw)[-1])
-    AUC_numerical_extrapolated, AUC_err = quad(biexp_abs_elim2,last_timepoint,np.inf,args=(lambda1, lambda2, A1))
+    AUC_numerical_extrapolated, AUC_err = quad(biexp_abs_elim2,last_timepoint,np.inf,args=(lambda1, lambda2, A1), limit=100)
     return [lambda1, lambda2, A1, y_fit, AUC_calculated,AUC_numerical_extrapolated]
 
 def biexpelim_func3(x_raw,y_raw,x_fit): # from Voximetry
-    popt, pcov = curve_fit(biexp_abs_elim3, x_raw, y_raw, p0=(0.01, 0.1, 1, 0.001))
+    popt, pcov = curve_fit(biexp_abs_elim3, x_raw, y_raw, p0=(0.01, 0.1, 1, 0.001), maxfev=5000)
     lambda1, lambda2, A1, A2 = popt
     y_fit = biexp_abs_elim3(x_fit,lambda1, lambda2, A1, A2)
     AUC_calculated = (A1*(1/lambda1)) - (A2* (1/lambda2))
     last_timepoint = float(list(x_raw)[-1])
-    AUC_numerical_extrapolated, AUC_err = quad(biexp_abs_elim3,last_timepoint,np.inf,args=(lambda1, lambda2, A1, A2))
+    AUC_numerical_extrapolated, AUC_err = quad(biexp_abs_elim3,last_timepoint,np.inf,args=(lambda1, lambda2, A1, A2), limit=100)
     return [lambda1, lambda2, A1,A2, y_fit, AUC_calculated,AUC_numerical_extrapolated]
 
 
